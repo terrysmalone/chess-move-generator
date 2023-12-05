@@ -2,29 +2,35 @@ package boardrepresentation
 
 // Minimum representation of a board in a game of chess
 type GameBoard struct {
-	board Board
+	Board Board
 
-	whiteCanCastleKingside  bool
-	whiteCanCastleQueenside bool
+	WhiteCanCastleKingside  bool
+	WhiteCanCastleQueenside bool
 
-	blackCanCastleKingside  bool
-	blackCanCastleQueenside bool
+	BlackCanCastleKingside  bool
+	BlackCanCastleQueenside bool
 
-	enPassantPosition uint64
+	EnPassantPosition uint64
 
-	whiteToMove bool
+	WhiteToMove bool
+
+	HalfMoveClock int
+	FullMoveClock int
 }
 
 func (g *GameBoard) initialiseStartingGamePosition() {
-	g.board.initialiseStartingPosition()
+	g.Board.initialiseStartingPosition()
 
-	g.whiteCanCastleKingside = true
-	g.whiteCanCastleQueenside = true
+	g.WhiteCanCastleKingside = true
+	g.WhiteCanCastleQueenside = true
 
-	g.blackCanCastleKingside = true
-	g.blackCanCastleQueenside = true
+	g.BlackCanCastleKingside = true
+	g.BlackCanCastleQueenside = true
 
-	g.enPassantPosition = 0
+	g.EnPassantPosition = 0
 
-	g.whiteToMove = true
+	g.WhiteToMove = true
+
+	g.HalfMoveClock = 0
+	g.FullMoveClock = 0
 }

@@ -11,15 +11,18 @@ func TestInitialiseStartingGamePosition(t *testing.T) {
 
 	gameBoard.initialiseStartingGamePosition()
 
-	assert.EqualValues(t, 65280, gameBoard.board.whitePawns)
-	assert.EqualValues(t, 576460752303423488, gameBoard.board.blackQueens)
+	assert.EqualValues(t, 65280, gameBoard.Board.WhitePawns)
+	assert.EqualValues(t, 576460752303423488, gameBoard.Board.BlackQueens)
 
-	assert.Equal(t, true, gameBoard.whiteCanCastleKingside)
-	assert.Equal(t, true, gameBoard.whiteCanCastleQueenside)
-	assert.Equal(t, true, gameBoard.blackCanCastleKingside)
-	assert.Equal(t, true, gameBoard.blackCanCastleQueenside)
+	assert.Equal(t, true, gameBoard.WhiteCanCastleKingside)
+	assert.Equal(t, true, gameBoard.WhiteCanCastleQueenside)
+	assert.Equal(t, true, gameBoard.BlackCanCastleKingside)
+	assert.Equal(t, true, gameBoard.BlackCanCastleQueenside)
 
-	assert.EqualValues(t, 0, gameBoard.enPassantPosition)
+	assert.EqualValues(t, 0, gameBoard.EnPassantPosition)
 
-	assert.Equal(t, true, gameBoard.whiteToMove)
+	assert.Equal(t, true, gameBoard.WhiteToMove)
+
+	assert.Equal(t, 0, gameBoard.HalfMoveClock)
+	assert.Equal(t, 0, gameBoard.FullMoveClock)
 }
