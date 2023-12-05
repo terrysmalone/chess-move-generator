@@ -1,13 +1,14 @@
 package fentranslator
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/terrysmalone/chess-move-generator/boardrepresentation"
 )
 
 // Fen notation - "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-func toGameBoard(fenString string, gameBoard *boardrepresentation.GameBoard) {
+func toGameBoard(fenString string, gameBoard *boardrepresentation.GameBoard) error {
 	parts := strings.Fields(fenString)
 
 	// Split fen string
@@ -20,11 +21,26 @@ func toGameBoard(fenString string, gameBoard *boardrepresentation.GameBoard) {
 		gameBoard.WhiteToMove = false
 	}
 
-	// [2] Castling status
+	// Castling status
 	toCastlingStatus(parts[2], gameBoard)
 
-	// [3] half move clock
-	// [4] Full move clock
+	// TODO: parts[3] en passant
+
+	// Half move clock
+	halfMove, err := strconv.Atoi(parts[4])
+	if err != nil {
+		return err
+	}
+	gameBoard.HalfMoveClock = halfMove
+
+	// Full move clock
+	fullMove, err := strconv.Atoi(parts[5])
+	if err != nil {
+		return err
+	}
+	gameBoard.FullMoveClock = fullMove
+
+	return nil
 }
 
 func toCastlingStatus(castlingFen string, gameBoard *boardrepresentation.GameBoard) {
