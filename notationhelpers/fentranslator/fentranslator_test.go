@@ -21,10 +21,10 @@ func TestToGameBoard_WhiteToMove(t *testing.T) {
 	assert.Equal(t, true, gameBoard.WhiteToMove)
 }
 
-func TestToGameBoard_CastlingStatus(t *testing.T) {
+func TestToCastlingStatus(t *testing.T) {
 	tests := []struct {
 		name                   string
-		fenNotation            string
+		fenCastlingStatus      string
 		expectedWhiteKingside  bool
 		expectedWhiteQueenside bool
 		expectedBlackKingside  bool
@@ -32,7 +32,7 @@ func TestToGameBoard_CastlingStatus(t *testing.T) {
 	}{
 		{
 			name:                   "All can castle",
-			fenNotation:            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 0",
+			fenCastlingStatus:      "KQkq",
 			expectedWhiteKingside:  true,
 			expectedWhiteQueenside: true,
 			expectedBlackKingside:  true,
@@ -40,7 +40,7 @@ func TestToGameBoard_CastlingStatus(t *testing.T) {
 		},
 		{
 			name:                   "None can castle",
-			fenNotation:            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b - - 0 0",
+			fenCastlingStatus:      "-",
 			expectedWhiteKingside:  false,
 			expectedWhiteQueenside: false,
 			expectedBlackKingside:  false,
@@ -48,7 +48,7 @@ func TestToGameBoard_CastlingStatus(t *testing.T) {
 		},
 		{
 			name:                   "Only white can castle",
-			fenNotation:            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQ - 0 0",
+			fenCastlingStatus:      "KQ",
 			expectedWhiteKingside:  true,
 			expectedWhiteQueenside: true,
 			expectedBlackKingside:  false,
@@ -56,7 +56,7 @@ func TestToGameBoard_CastlingStatus(t *testing.T) {
 		},
 		{
 			name:                   "Only black can castle",
-			fenNotation:            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b kq - 0 0",
+			fenCastlingStatus:      "kq",
 			expectedWhiteKingside:  false,
 			expectedWhiteQueenside: false,
 			expectedBlackKingside:  true,
@@ -64,7 +64,7 @@ func TestToGameBoard_CastlingStatus(t *testing.T) {
 		},
 		{
 			name:                   "Only kingside can castle",
-			fenNotation:            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b Kk - 0 0",
+			fenCastlingStatus:      "Kk",
 			expectedWhiteKingside:  true,
 			expectedWhiteQueenside: false,
 			expectedBlackKingside:  true,
@@ -72,7 +72,7 @@ func TestToGameBoard_CastlingStatus(t *testing.T) {
 		},
 		{
 			name:                   "Only queenside can castle",
-			fenNotation:            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b Qq - 0 0",
+			fenCastlingStatus:      "Qq",
 			expectedWhiteKingside:  false,
 			expectedWhiteQueenside: true,
 			expectedBlackKingside:  false,
@@ -84,13 +84,82 @@ func TestToGameBoard_CastlingStatus(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			gameBoard := &boardrepresentation.GameBoard{}
 
-			err := toGameBoard(tt.fenNotation, gameBoard)
-			require.NoError(t, err)
+			toCastlingStatus(tt.fenCastlingStatus, gameBoard)
 
 			assert.Equal(t, tt.expectedWhiteKingside, gameBoard.WhiteCanCastleKingside)
 			assert.Equal(t, tt.expectedWhiteQueenside, gameBoard.WhiteCanCastleQueenside)
 			assert.Equal(t, tt.expectedBlackKingside, gameBoard.BlackCanCastleKingside)
 			assert.Equal(t, tt.expectedBlackKingside, gameBoard.BlackCanCastleKingside)
+		})
+	}
+}
+
+func TestToEnPassantPosition(t *testing.T) {
+	tests := []struct {
+		name                      string
+		fenEnPassantPosition      string
+		expectedEnPassantPosition uint64
+		expectedError             error
+	}{
+		{
+			name:                      "Invalid text",
+			fenEnPassantPosition:      "invalid",
+			expectedEnPassantPosition: 0,
+			expectedError:             fmt.Errorf("there should only be two characters in en passant position. There are 7"),
+		},
+		{
+			name:                      "No en passant position",
+			fenEnPassantPosition:      "-",
+			expectedEnPassantPosition: 0,
+		},
+		{
+			name:                      "Set a position",
+			fenEnPassantPosition:      "e3",
+			expectedEnPassantPosition: 1048576,
+		},
+		{
+			name:                      "Set a high uint position",
+			fenEnPassantPosition:      "h6",
+			expectedEnPassantPosition: 140737488355328,
+		},
+		{
+			name:                      "Set to a8",
+			fenEnPassantPosition:      "a8",
+			expectedEnPassantPosition: 72057594037927936,
+		},
+		{
+			name:                      "Set to a1",
+			fenEnPassantPosition:      "a1",
+			expectedEnPassantPosition: 1,
+		},
+		{
+			name:                      "Set to h8",
+			fenEnPassantPosition:      "h8",
+			expectedEnPassantPosition: 9223372036854775808,
+		},
+		{
+			name:                      "Set to h1",
+			fenEnPassantPosition:      "h1",
+			expectedEnPassantPosition: 128,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gameBoard := &boardrepresentation.GameBoard{}
+
+			// Set it to something so we can be sure it changes
+			gameBoard.EnPassantPosition = 70368744177664
+
+			err := toEnPassantPosition(tt.fenEnPassantPosition, gameBoard)
+
+			if tt.expectedError != nil {
+				require.EqualError(t, err, tt.expectedError.Error())
+			} else {
+				require.NoError(t, err)
+
+				assert.Equal(t, tt.expectedEnPassantPosition, gameBoard.EnPassantPosition)
+			}
 		})
 	}
 }
@@ -110,11 +179,18 @@ func TestToGameBoard_MoveClock(t *testing.T) {
 			expectedFullMoveClock: 6,
 		},
 		{
-			name:                  "Half clock error",
+			name:                  "Half move clock error",
 			fenNotation:           "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - ds 6",
 			expectedHalfMoveClock: 0,
 			expectedFullMoveClock: 0,
-			expectedError:         fmt.Errorf("strconv.Atoi: parsing \"ds\": invalid syntax"),
+			expectedError:         fmt.Errorf("error parsing half move clock:strconv.Atoi: parsing \"ds\": invalid syntax"),
+		},
+		{
+			name:                  "Full move clock error",
+			fenNotation:           "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 2 fev",
+			expectedHalfMoveClock: 2,
+			expectedFullMoveClock: 0,
+			expectedError:         fmt.Errorf("error parsing full move clock:strconv.Atoi: parsing \"fev\": invalid syntax"),
 		},
 	}
 
