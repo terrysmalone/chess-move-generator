@@ -80,7 +80,7 @@ func TestToBoard(t *testing.T) {
 			name:     "White pawns only",
 			fenBoard: "8/8/8/8/8/8/PPPPPPPP/8",
 			expectedBoard: boardrepresentation.Board{
-				WhitePawns: uint64(650), //65280
+				WhitePawns: uint64(65280),
 			},
 			expectedError: nil,
 		},
