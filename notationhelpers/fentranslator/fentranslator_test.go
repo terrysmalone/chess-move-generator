@@ -9,6 +9,54 @@ import (
 	"github.com/terrysmalone/chess-move-generator/boardrepresentation"
 )
 
+func TestToGameBoardErrors(t *testing.T) {
+	tests := []struct {
+		name          string
+		fenNotation   string
+		expectedError error
+	}{
+		{
+			name:          "Too few parts",
+			fenNotation:   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - 0 1",
+			expectedError: fmt.Errorf("there should be 6 parts to a fen notation string. There are 5"),
+		},
+		{
+			name:          "Too many parts",
+			fenNotation:   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq EXTRA - 0 1",
+			expectedError: fmt.Errorf("there should be 6 parts to a fen notation string. There are 7"),
+		},
+		{
+			name:          "To board error",
+			fenNotation:   "rnbqkbnr/pBQKBNR w KQkq - 0 1",
+			expectedError: fmt.Errorf("error parsing fen string to board: expected 8 rows. There are 2"),
+		},
+		{
+			name:          "En Passant error",
+			fenNotation:   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq WRONG 0 1",
+			expectedError: fmt.Errorf("error parsing En passant position: there should only be two characters in en passant position. There are 5"),
+		},
+		{
+			name:          "To board error",
+			fenNotation:   "rnbqkXnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq WRONG 0 1",
+			expectedError: fmt.Errorf("error parsing fen string to board: piece 'X' not recognised"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gameBoard := &boardrepresentation.GameBoard{}
+
+			err := toGameBoard(tt.fenNotation, gameBoard)
+
+			if tt.expectedError != nil {
+				require.EqualError(t, err, tt.expectedError.Error())
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
+
 func TestToGameBoard_WhiteToMove(t *testing.T) {
 	gameBoard := &boardrepresentation.GameBoard{}
 
@@ -144,6 +192,16 @@ func TestToBoard(t *testing.T) {
 			},
 			expectedError: nil,
 		},
+		{
+			name:          "Unrecognised Piece",
+			fenBoard:      "D7/8/8/8/8/8/8/8",
+			expectedError: fmt.Errorf("piece 'D' not recognised"),
+		},
+		{
+			name:          "Piece not letter or number",
+			fenBoard:      "8/8/8/8/7£/8/8/8",
+			expectedError: fmt.Errorf("piece '£' should be a letter or number"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -187,15 +245,36 @@ func TestToEnPassantPosition(t *testing.T) {
 			expectedEnPassantPosition: uint64(2199023255552),
 		},
 		{
-			name:                      "h6",
-			fenEnPassantPosition:      "h6",
-			expectedEnPassantPosition: uint64(140737488355328),
+			name:                      "c3",
+			fenEnPassantPosition:      "c3",
+			expectedEnPassantPosition: uint64(262144),
+		},
+		{
+			name:                      "d6",
+			fenEnPassantPosition:      "d6",
+			expectedEnPassantPosition: uint64(8796093022208),
+		},
+		{
+			name:                      "e3",
+			fenEnPassantPosition:      "e3",
+			expectedEnPassantPosition: uint64(1048576),
 		},
 		{
 			name:                      "f3",
 			fenEnPassantPosition:      "f3",
 			expectedEnPassantPosition: uint64(2097152),
 		},
+		{
+			name:                      "g3",
+			fenEnPassantPosition:      "g3",
+			expectedEnPassantPosition: uint64(4194304),
+		},
+		{
+			name:                      "h6",
+			fenEnPassantPosition:      "h6",
+			expectedEnPassantPosition: uint64(140737488355328),
+		},
+
 		{
 			name:                 "Text too long",
 			fenEnPassantPosition: "gtg",
@@ -259,14 +338,14 @@ func TestToGameBoard_MoveClock(t *testing.T) {
 			fenNotation:           "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - ds 6",
 			expectedHalfMoveClock: 0,
 			expectedFullMoveClock: 0,
-			expectedError:         fmt.Errorf("error parsing half move clock:strconv.Atoi: parsing \"ds\": invalid syntax"),
+			expectedError:         fmt.Errorf("error parsing half move clock: strconv.Atoi: parsing \"ds\": invalid syntax"),
 		},
 		{
 			name:                  "Full move clock error",
 			fenNotation:           "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 2 fev",
 			expectedHalfMoveClock: 2,
 			expectedFullMoveClock: 0,
-			expectedError:         fmt.Errorf("error parsing full move clock:strconv.Atoi: parsing \"fev\": invalid syntax"),
+			expectedError:         fmt.Errorf("error parsing full move clock: strconv.Atoi: parsing \"fev\": invalid syntax"),
 		},
 	}
 

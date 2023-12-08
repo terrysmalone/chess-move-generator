@@ -14,6 +14,10 @@ import (
 func toGameBoard(fenString string, gameBoard *boardrepresentation.GameBoard) error {
 	parts := strings.Fields(fenString)
 
+	if len(parts) != 6 {
+		return fmt.Errorf("there should be 6 parts to a fen notation string. There are %d", len(parts))
+	}
+
 	if err := toBoard(parts[0], gameBoard); err != nil {
 		return fmt.Errorf("error parsing fen string to board: %w", err)
 	}
@@ -34,14 +38,14 @@ func toGameBoard(fenString string, gameBoard *boardrepresentation.GameBoard) err
 	// Half move clock
 	halfMove, err := strconv.Atoi(parts[4])
 	if err != nil {
-		return fmt.Errorf("error parsing half move clock:%w", err)
+		return fmt.Errorf("error parsing half move clock: %w", err)
 	}
 	gameBoard.HalfMoveClock = halfMove
 
 	// Full move clock
 	fullMove, err := strconv.Atoi(parts[5])
 	if err != nil {
-		return fmt.Errorf("error parsing full move clock:%w", err)
+		return fmt.Errorf("error parsing full move clock: %w", err)
 	}
 	gameBoard.FullMoveClock = fullMove
 
@@ -95,7 +99,7 @@ func toBoard(boardFEN string, gameBoard *boardrepresentation.GameBoard) error {
 			} else if unicode.IsNumber(piece) {
 				currentColumn += int(piece - '0')
 			} else {
-				return fmt.Errorf("rune %s should be a letter or number", strconv.QuoteRune(piece))
+				return fmt.Errorf("piece %s should be a letter or number", strconv.QuoteRune(piece))
 			}
 		}
 	}
