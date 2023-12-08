@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/terrysmalone/chess-move-generator/boardrepresentation"
 	"github.com/terrysmalone/chess-move-generator/boardsearching/lookuptables"
@@ -13,8 +14,9 @@ import (
 func toGameBoard(fenString string, gameBoard *boardrepresentation.GameBoard) error {
 	parts := strings.Fields(fenString)
 
-	// Split fen string
-	// [0] board
+	if err := toBoard(parts[0], gameBoard); err != nil {
+		return fmt.Errorf("error parsing fen string to board: %w", err)
+	}
 
 	// Side to move
 	if parts[1] == "w" {
@@ -25,8 +27,7 @@ func toGameBoard(fenString string, gameBoard *boardrepresentation.GameBoard) err
 
 	toCastlingStatus(parts[2], gameBoard)
 
-	err := toEnPassantPosition(parts[3], gameBoard)
-	if err != nil {
+	if err := toEnPassantPosition(parts[3], gameBoard); err != nil {
 		return fmt.Errorf("error parsing En passant position: %w", err)
 	}
 
@@ -43,6 +44,61 @@ func toGameBoard(fenString string, gameBoard *boardrepresentation.GameBoard) err
 		return fmt.Errorf("error parsing full move clock:%w", err)
 	}
 	gameBoard.FullMoveClock = fullMove
+
+	return nil
+}
+
+func toBoard(boardFEN string, gameBoard *boardrepresentation.GameBoard) error {
+	rows := strings.Split(boardFEN, "/")
+
+	if len(rows) != 8 {
+		return fmt.Errorf("expected 8 rows. There are %d", len(rows))
+	}
+
+	for r := 0; r < 8; r++ {
+		pieces := []rune(rows[r])
+
+		currentRow := 7 - r
+		currentColumn := 0
+		for _, piece := range pieces {
+			if unicode.IsLetter(piece) {
+				// Get piece from letter
+				switch piece {
+				case 'P':
+					gameBoard.Board.WhitePawns |= lookuptables.BitboardValueFromPosition[currentColumn][currentRow]
+				case 'N':
+					gameBoard.Board.WhiteKnights |= lookuptables.BitboardValueFromPosition[currentColumn][currentRow]
+				case 'B':
+					gameBoard.Board.WhiteBishops |= lookuptables.BitboardValueFromPosition[currentColumn][currentRow]
+				case 'R':
+					gameBoard.Board.WhiteRooks |= lookuptables.BitboardValueFromPosition[currentColumn][currentRow]
+				case 'Q':
+					gameBoard.Board.WhiteQueens |= lookuptables.BitboardValueFromPosition[currentColumn][currentRow]
+				case 'K':
+					gameBoard.Board.WhiteKing |= lookuptables.BitboardValueFromPosition[currentColumn][currentRow]
+				case 'p':
+					gameBoard.Board.BlackPawns |= lookuptables.BitboardValueFromPosition[currentColumn][currentRow]
+				case 'n':
+					gameBoard.Board.BlackKnights |= lookuptables.BitboardValueFromPosition[currentColumn][currentRow]
+				case 'b':
+					gameBoard.Board.BlackBishops |= lookuptables.BitboardValueFromPosition[currentColumn][currentRow]
+				case 'r':
+					gameBoard.Board.BlackRooks |= lookuptables.BitboardValueFromPosition[currentColumn][currentRow]
+				case 'q':
+					gameBoard.Board.BlackQueens |= lookuptables.BitboardValueFromPosition[currentColumn][currentRow]
+				case 'k':
+					gameBoard.Board.BlackKing |= lookuptables.BitboardValueFromPosition[currentColumn][currentRow]
+				default:
+					return fmt.Errorf("piece %s not recognised", strconv.QuoteRune(piece))
+				}
+				currentColumn += 1
+			} else if unicode.IsNumber(piece) {
+				currentColumn += int(piece - '0')
+			} else {
+				return fmt.Errorf("rune %s should be a letter or number", strconv.QuoteRune(piece))
+			}
+		}
+	}
 
 	return nil
 }

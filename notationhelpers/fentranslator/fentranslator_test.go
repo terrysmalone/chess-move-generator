@@ -21,62 +21,128 @@ func TestToGameBoard_WhiteToMove(t *testing.T) {
 	assert.Equal(t, true, gameBoard.WhiteToMove)
 }
 
-func TestToCastlingStatus(t *testing.T) {
+func TestToBoard(t *testing.T) {
 	tests := []struct {
-		name                   string
-		fenCastlingStatus      string
-		expectedWhiteKingside  bool
-		expectedWhiteQueenside bool
-		expectedBlackKingside  bool
-		expectedBlackQueenside bool
+		name          string
+		fenBoard      string
+		expectedBoard boardrepresentation.Board
+		expectedError error
 	}{
 		{
-			name:                   "All can castle",
-			fenCastlingStatus:      "KQkq",
-			expectedWhiteKingside:  true,
-			expectedWhiteQueenside: true,
-			expectedBlackKingside:  true,
-			expectedBlackQueenside: true,
+			name:     "White pawns only",
+			fenBoard: "8/8/8/8/8/8/PPPPPPPP/8",
+			expectedBoard: boardrepresentation.Board{
+				WhitePawns: uint64(65280),
+			},
+			expectedError: nil,
 		},
 		{
-			name:                   "None can castle",
-			fenCastlingStatus:      "-",
-			expectedWhiteKingside:  false,
-			expectedWhiteQueenside: false,
-			expectedBlackKingside:  false,
-			expectedBlackQueenside: false,
+			name:     "Black pawns only",
+			fenBoard: "8/pppppppp/8/8/8/8/8/8",
+			expectedBoard: boardrepresentation.Board{
+				BlackPawns: uint64(71776119061217280),
+			},
+			expectedError: nil,
 		},
 		{
-			name:                   "Only white can castle",
-			fenCastlingStatus:      "KQ",
-			expectedWhiteKingside:  true,
-			expectedWhiteQueenside: true,
-			expectedBlackKingside:  false,
-			expectedBlackQueenside: false,
+			name:     "White knights only",
+			fenBoard: "8/8/8/8/8/8/8/1N4N1",
+			expectedBoard: boardrepresentation.Board{
+				WhiteKnights: uint64(66),
+			},
+			expectedError: nil,
 		},
 		{
-			name:                   "Only black can castle",
-			fenCastlingStatus:      "kq",
-			expectedWhiteKingside:  false,
-			expectedWhiteQueenside: false,
-			expectedBlackKingside:  true,
-			expectedBlackQueenside: true,
+			name:     "Black knights only",
+			fenBoard: "1n4n1/8/8/8/8/8/8/8",
+			expectedBoard: boardrepresentation.Board{
+				BlackKnights: uint64(4755801206503243776),
+			},
+			expectedError: nil,
 		},
 		{
-			name:                   "Only kingside can castle",
-			fenCastlingStatus:      "Kk",
-			expectedWhiteKingside:  true,
-			expectedWhiteQueenside: false,
-			expectedBlackKingside:  true,
-			expectedBlackQueenside: false,
+			name:     "White bishops only",
+			fenBoard: "8/8/8/8/8/8/8/2B2B2",
+			expectedBoard: boardrepresentation.Board{
+				WhiteBishops: uint64(36),
+			},
+			expectedError: nil,
 		},
 		{
-			name:                   "Only queenside can castle",
-			fenCastlingStatus:      "Qq",
-			expectedWhiteKingside:  false,
-			expectedWhiteQueenside: true,
-			expectedBlackKingside:  false,
-			expectedBlackQueenside: true,
+			name:     "Black bishops only",
+			fenBoard: "2b2b2/8/8/8/8/8/8/8",
+			expectedBoard: boardrepresentation.Board{
+				BlackBishops: uint64(2594073385365405696),
+			},
+			expectedError: nil,
+		},
+		{
+			name:     "White rooks only",
+			fenBoard: "8/8/8/8/8/8/8/R6R",
+			expectedBoard: boardrepresentation.Board{
+				WhiteRooks: uint64(129),
+			},
+			expectedError: nil,
+		},
+		{
+			name:     "Black rooks only",
+			fenBoard: "r6r/8/8/8/8/8/8/8",
+			expectedBoard: boardrepresentation.Board{
+				BlackRooks: uint64(9295429630892703744),
+			},
+			expectedError: nil,
+		},
+		{
+			name:     "White queens only",
+			fenBoard: "8/8/8/8/8/8/8/3Q4",
+			expectedBoard: boardrepresentation.Board{
+				WhiteQueens: uint64(8),
+			},
+			expectedError: nil,
+		},
+		{
+			name:     "Black queens only",
+			fenBoard: "3q4/8/8/8/8/8/8/8",
+			expectedBoard: boardrepresentation.Board{
+				BlackQueens: uint64(576460752303423488),
+			},
+			expectedError: nil,
+		},
+		{
+			name:     "White king only",
+			fenBoard: "8/8/8/8/8/8/8/4K3",
+			expectedBoard: boardrepresentation.Board{
+				WhiteKing: uint64(16),
+			},
+			expectedError: nil,
+		},
+		{
+			name:     "Black king only",
+			fenBoard: "4k3/8/8/8/8/8/8/8",
+			expectedBoard: boardrepresentation.Board{
+				BlackKing: uint64(1152921504606846976),
+			},
+			expectedError: nil,
+		},
+		{
+			name:     "All pieces starting position",
+			fenBoard: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
+			expectedBoard: boardrepresentation.Board{
+				WhitePawns:   uint64(65280),
+				WhiteKnights: uint64(66),
+				WhiteBishops: uint64(36),
+				WhiteRooks:   uint64(129),
+				WhiteQueens:  uint64(8),
+				WhiteKing:    uint64(16),
+
+				BlackPawns:   uint64(71776119061217280),
+				BlackKnights: uint64(4755801206503243776),
+				BlackBishops: uint64(2594073385365405696),
+				BlackRooks:   uint64(9295429630892703744),
+				BlackQueens:  uint64(576460752303423488),
+				BlackKing:    uint64(1152921504606846976),
+			},
+			expectedError: nil,
 		},
 	}
 
@@ -84,82 +150,15 @@ func TestToCastlingStatus(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			gameBoard := &boardrepresentation.GameBoard{}
 
-			toCastlingStatus(tt.fenCastlingStatus, gameBoard)
-
-			assert.Equal(t, tt.expectedWhiteKingside, gameBoard.WhiteCanCastleKingside)
-			assert.Equal(t, tt.expectedWhiteQueenside, gameBoard.WhiteCanCastleQueenside)
-			assert.Equal(t, tt.expectedBlackKingside, gameBoard.BlackCanCastleKingside)
-			assert.Equal(t, tt.expectedBlackKingside, gameBoard.BlackCanCastleKingside)
-		})
-	}
-}
-
-func TestToEnPassantPosition(t *testing.T) {
-	tests := []struct {
-		name                      string
-		fenEnPassantPosition      string
-		expectedEnPassantPosition uint64
-		expectedError             error
-	}{
-		{
-			name:                      "Invalid text",
-			fenEnPassantPosition:      "invalid",
-			expectedEnPassantPosition: 0,
-			expectedError:             fmt.Errorf("there should only be two characters in en passant position. There are 7"),
-		},
-		{
-			name:                      "No en passant position",
-			fenEnPassantPosition:      "-",
-			expectedEnPassantPosition: 0,
-		},
-		{
-			name:                      "Set a position",
-			fenEnPassantPosition:      "e3",
-			expectedEnPassantPosition: 1048576,
-		},
-		{
-			name:                      "Set a high uint position",
-			fenEnPassantPosition:      "h6",
-			expectedEnPassantPosition: 140737488355328,
-		},
-		{
-			name:                      "Set to a8",
-			fenEnPassantPosition:      "a8",
-			expectedEnPassantPosition: 72057594037927936,
-		},
-		{
-			name:                      "Set to a1",
-			fenEnPassantPosition:      "a1",
-			expectedEnPassantPosition: 1,
-		},
-		{
-			name:                      "Set to h8",
-			fenEnPassantPosition:      "h8",
-			expectedEnPassantPosition: 9223372036854775808,
-		},
-		{
-			name:                      "Set to h1",
-			fenEnPassantPosition:      "h1",
-			expectedEnPassantPosition: 128,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gameBoard := &boardrepresentation.GameBoard{}
-
-			// Set it to something so we can be sure it changes
-			gameBoard.EnPassantPosition = 70368744177664
-
-			err := toEnPassantPosition(tt.fenEnPassantPosition, gameBoard)
+			err := toBoard(tt.fenBoard, gameBoard)
 
 			if tt.expectedError != nil {
 				require.EqualError(t, err, tt.expectedError.Error())
 			} else {
 				require.NoError(t, err)
-
-				assert.Equal(t, tt.expectedEnPassantPosition, gameBoard.EnPassantPosition)
 			}
+
+			assert.Equal(t, tt.expectedBoard, gameBoard.Board)
 		})
 	}
 }
