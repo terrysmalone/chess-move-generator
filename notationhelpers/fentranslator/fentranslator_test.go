@@ -163,6 +163,83 @@ func TestToBoard(t *testing.T) {
 	}
 }
 
+func TestToEnPassantPosition(t *testing.T) {
+	tests := []struct {
+		name                      string
+		fenEnPassantPosition      string
+		expectedEnPassantPosition uint64
+		expectedFullMoveClock     int
+		expectedError             error
+	}{
+		{
+			name:                      "No en passant position",
+			fenEnPassantPosition:      "-",
+			expectedEnPassantPosition: uint64(0),
+		},
+		{
+			name:                      "a3",
+			fenEnPassantPosition:      "a3",
+			expectedEnPassantPosition: uint64(65536),
+		},
+		{
+			name:                      "b6",
+			fenEnPassantPosition:      "b6",
+			expectedEnPassantPosition: uint64(2199023255552),
+		},
+		{
+			name:                      "h6",
+			fenEnPassantPosition:      "h6",
+			expectedEnPassantPosition: uint64(140737488355328),
+		},
+		{
+			name:                      "f3",
+			fenEnPassantPosition:      "f3",
+			expectedEnPassantPosition: uint64(2097152),
+		},
+		{
+			name:                 "Text too long",
+			fenEnPassantPosition: "gtg",
+			expectedError:        fmt.Errorf("there should only be two characters in en passant position. There are 3"),
+		},
+		{
+			name:                 "Column text not a letter",
+			fenEnPassantPosition: "34",
+			expectedError:        fmt.Errorf("en passant column must be a letter. It is '3'"),
+		},
+		{
+			name:                 "Column text invalid",
+			fenEnPassantPosition: "j4",
+			expectedError:        fmt.Errorf("en passant column 'j' not recognised"),
+		},
+		{
+			name:                 "Row text not a number",
+			fenEnPassantPosition: "ab",
+			expectedError:        fmt.Errorf("en passant row must be a number. It is 'b'"),
+		},
+		{
+			name:                 "Row text invalid",
+			fenEnPassantPosition: "a9",
+			expectedError:        fmt.Errorf("en passant row '9' not recognised"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gameBoard := &boardrepresentation.GameBoard{}
+
+			err := toEnPassantPosition(tt.fenEnPassantPosition, gameBoard)
+
+			if tt.expectedError != nil {
+				require.EqualError(t, err, tt.expectedError.Error())
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.Equal(t, tt.expectedEnPassantPosition, gameBoard.EnPassantPosition)
+		})
+	}
+}
+
 func TestToGameBoard_MoveClock(t *testing.T) {
 	tests := []struct {
 		name                  string

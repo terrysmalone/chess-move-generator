@@ -135,6 +135,9 @@ func toEnPassantPosition(enPassantFen string, gameBoard *boardrepresentation.Gam
 		chars := []rune(enPassantFen)
 
 		column := chars[0]
+		if !unicode.IsLetter(chars[0]) {
+			return fmt.Errorf("en passant column must be a letter. It is %s", strconv.QuoteRune(column))
+		}
 		var columnNum int
 
 		switch column {
@@ -155,10 +158,18 @@ func toEnPassantPosition(enPassantFen string, gameBoard *boardrepresentation.Gam
 		case 'h':
 			columnNum = 7
 		default:
-			return fmt.Errorf("en passant column %d not recognised", column)
+			return fmt.Errorf("en passant column %s not recognised", strconv.QuoteRune(column))
+		}
+
+		if !unicode.IsNumber(chars[1]) {
+			return fmt.Errorf("en passant row must be a number. It is %s", strconv.QuoteRune(chars[1]))
 		}
 
 		rowNum := int(chars[1]-'0') - 1
+
+		if rowNum > 7 {
+			return fmt.Errorf("en passant row %s not recognised", strconv.QuoteRune(chars[1]))
+		}
 
 		gameBoard.EnPassantPosition = lookuptables.BitboardValueFromPosition[columnNum][rowNum]
 	} else {
