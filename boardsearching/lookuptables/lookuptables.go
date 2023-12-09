@@ -76,9 +76,11 @@ const (
 )
 
 var BitboardValueFromPosition [8][8]uint64
+var BitboardValueFromIndex [64]uint64
 
 func init() {
 	initialiseBitboardValueFromPosition()
+	initialiseBitboardValueFromIndex()
 }
 
 func initialiseBitboardValueFromPosition() {
@@ -89,5 +91,14 @@ func initialiseBitboardValueFromPosition() {
 			BitboardValueFromPosition[column][row] = squareValue
 			squareValue <<= 1
 		}
+	}
+}
+
+func initialiseBitboardValueFromIndex() {
+	BitboardValueFromIndex[0] = 1
+
+	for i := 1; i < len(BitboardValueFromIndex); i++ {
+		//Left shift gives the same result as multiplying by two but is faster
+		BitboardValueFromIndex[i] = BitboardValueFromIndex[i-1] << 1
 	}
 }
