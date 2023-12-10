@@ -1,10 +1,12 @@
 package boardrepresentation
 
+type PieceType int
+
 const (
-	PawnPieceType   = iota
-	KnightPieceType = iota
-	BishopPieceType = iota
-	RookPieceType   = iota
-	QueenPieceType  = iota
-	KingPieceType   = iota
+	PawnPieceType   PieceType = iota
+	KnightPieceType PieceType = iota
+	BishopPieceType PieceType = iota
+	RookPieceType   PieceType = iota
+	QueenPieceType  PieceType = iota
+	KingPieceType   PieceType = iota
 )

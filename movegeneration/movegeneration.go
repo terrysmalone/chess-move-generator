@@ -6,9 +6,6 @@ import (
 	"github.com/terrysmalone/chess-move-generator/boardsearching/lookuptables"
 )
 
-type PieceMove struct {
-}
-
 func CalculateAllMoves(gameBoard *boardrepresentation.GameBoard) {
 	allMoves := calculateAllPseudoLegalMoves(gameBoard)
 
@@ -24,7 +21,7 @@ func calculateAllPseudoLegalMoves(gameBoard *boardrepresentation.GameBoard) []Pi
 	allMoves := []PieceMove{}
 
 	if gameBoard.WhiteToMove {
-		calculateWhiteKnigthMoves(gameBoard.Board.WhiteKnights)
+		calculateWhiteKnightMoves(gameBoard.Board.WhiteKnights)
 		// calculateBishopMoves
 		// calculateRookMoves
 		// calculateQueenMoves
@@ -45,7 +42,7 @@ func calculateAllPseudoLegalMoves(gameBoard *boardrepresentation.GameBoard) []Pi
 	return allMoves
 }
 
-func calculateWhiteKnigthMoves(whiteKnightPositions uint64) ([]PieceMove, error) {
+func calculateWhiteKnightMoves(whiteKnightPositions uint64) ([]PieceMove, error) {
 	// Get whiteKnightPositions from bitboard
 	whiteKnightIndexes := bitboardoperations.GetSquareIndexesFromBitboard(whiteKnightPositions)
 
@@ -55,8 +52,23 @@ func calculateWhiteKnigthMoves(whiteKnightPositions uint64) ([]PieceMove, error)
 	for index >= 0 {
 		currentPosition := whiteKnightIndexes[index]
 
-		_ = lookuptables.BitboardValueFromIndex[currentPosition]
-		_ = boardrepresentation.KnightPieceType
+		pieceBitboard := lookuptables.BitboardValueFromIndex[currentPosition]
+		pieceType := boardrepresentation.KnightPieceType
+
+		possibleMoves := ValidKnightMoves[currentPosition]
+		splitMoves := bitboardoperations.SplitBitboard(possibleMoves)
+
+		// Temp so I can use the values
+		_ = PieceMove{
+			PositionBitboard: pieceBitboard,
+			MovesBitboard:    possibleMoves,
+			PieceType:        pieceType,
+			MoveType:         0,
+		}
+
+		for _, _ = range splitMoves {
+
+		}
 
 		// Calculate possible moves bitboard
 		// Split moves
