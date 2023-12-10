@@ -7,6 +7,8 @@ import (
 )
 
 func CalculateAllMoves(gameBoard *boardrepresentation.GameBoard) {
+	gameBoard.CalculateUsefulBitboards()
+
 	allMoves := calculateAllPseudoLegalMoves(gameBoard)
 
 	removeSelfCheckingMoves(gameBoard, &allMoves)
@@ -21,7 +23,7 @@ func calculateAllPseudoLegalMoves(gameBoard *boardrepresentation.GameBoard) []Pi
 	allMoves := []PieceMove{}
 
 	if gameBoard.WhiteToMove {
-		calculateWhiteKnightMoves(gameBoard.Board.WhiteKnights)
+		calculateWhiteKnightMoves(gameBoard)
 		// calculateBishopMoves
 		// calculateRookMoves
 		// calculateQueenMoves
@@ -42,9 +44,10 @@ func calculateAllPseudoLegalMoves(gameBoard *boardrepresentation.GameBoard) []Pi
 	return allMoves
 }
 
-func calculateWhiteKnightMoves(whiteKnightPositions uint64) ([]PieceMove, error) {
+func calculateWhiteKnightMoves(gameBoard *boardrepresentation.GameBoard) ([]PieceMove, error) {
+	moves := []PieceMove{}
 	// Get whiteKnightPositions from bitboard
-	whiteKnightIndexes := bitboardoperations.GetSquareIndexesFromBitboard(whiteKnightPositions)
+	whiteKnightIndexes := bitboardoperations.GetSquareIndexesFromBitboard(gameBoard.Board.WhiteKnights)
 
 	// We need to iterate through the positions backwards
 	index := len(whiteKnightIndexes) - 1
@@ -66,8 +69,22 @@ func calculateWhiteKnightMoves(whiteKnightPositions uint64) ([]PieceMove, error)
 			MoveType:         0,
 		}
 
-		for _, _ = range splitMoves {
-
+		for _, move := range splitMoves {
+			if (move & gameBoard.UsefulBitboards.AllBlackOccupiedSquares) > 0 {
+				moves = append(moves, PieceMove{
+					PositionBitboard: pieceBitboard,
+					MovesBitboard:    move,
+					PieceType:        pieceType,
+					MoveType:         boardrepresentation.CaptureMoveType,
+				})
+			} else if (move & gameBoard.UsefulBitboards.EmptySquares) > 0 {
+				moves = append(moves, PieceMove{
+					PositionBitboard: pieceBitboard,
+					MovesBitboard:    move,
+					PieceType:        pieceType,
+					MoveType:         boardrepresentation.NormalMoveType,
+				})
+			}
 		}
 
 		// Calculate possible moves bitboard
@@ -83,7 +100,7 @@ func calculateWhiteKnightMoves(whiteKnightPositions uint64) ([]PieceMove, error)
 		index--
 	}
 
-	return []PieceMove{}, nil
+	return moves, nil
 }
 
 // Note: We want to change the slice in place since passing the slice by value and then returning a new slice will

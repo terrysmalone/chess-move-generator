@@ -1,8 +1,11 @@
 package boardrepresentation
 
+import "math"
+
 // Minimum representation of a board in a game of chess
 type GameBoard struct {
-	Board Board
+	Board           Board
+	UsefulBitboards UsefulBitboards
 
 	WhiteCanCastleKingside  bool
 	WhiteCanCastleQueenside bool
@@ -33,4 +36,11 @@ func (g *GameBoard) initialiseStartingGamePosition() {
 
 	g.HalfMoveClock = 0
 	g.FullMoveClock = 0
+}
+
+func (g *GameBoard) CalculateUsefulBitboards() {
+	g.UsefulBitboards.AllWhiteOccupiedSquares = g.Board.WhitePawns | g.Board.WhiteKnights | g.Board.WhiteBishops | g.Board.WhiteRooks | g.Board.WhiteQueens | g.Board.WhiteKing
+	g.UsefulBitboards.AllBlackOccupiedSquares = g.Board.BlackPawns | g.Board.BlackKnights | g.Board.BlackBishops | g.Board.BlackRooks | g.Board.BlackQueens | g.Board.BlackKing
+	g.UsefulBitboards.AllOccupiedSquares = g.UsefulBitboards.AllWhiteOccupiedSquares | g.UsefulBitboards.AllBlackOccupiedSquares
+	g.UsefulBitboards.EmptySquares = g.UsefulBitboards.AllOccupiedSquares ^ math.MaxUint64
 }
