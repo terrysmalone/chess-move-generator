@@ -19,6 +19,8 @@ func getSquareIndexFromBitboard(bitboard uint64) byte {
 	return index64[((bitboard&(^bitboard+1))*debruijn64)>>58]
 }
 
+// GetSquareIndexesFromBitboard gets multiple indexes from
+// a bitboard with more than 1 square set
 func GetSquareIndexesFromBitboard(bitboard uint64) []byte {
 	values := []byte{}
 
