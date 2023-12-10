@@ -1,6 +1,7 @@
 package lookuptables
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -81,4 +82,101 @@ func TestConsts(t *testing.T) {
 	assert.EqualValues(t, E8*uint64(2), F8)
 	assert.EqualValues(t, F8*uint64(2), G8)
 	assert.EqualValues(t, G8*uint64(2), H8)
+}
+
+func TestBitboardValueFromPosition(t *testing.T) {
+	tests := []struct {
+		name             string
+		column           int
+		row              int
+		expectedBitboard uint64
+	}{
+		{
+			name:             "First (a1)",
+			column:           0,
+			row:              0,
+			expectedBitboard: uint64(1),
+		},
+		{
+			name:             "Last (h8)",
+			column:           7,
+			row:              7,
+			expectedBitboard: uint64(9223372036854775808),
+		},
+		{
+			name:             "d3",
+			column:           3,
+			row:              2,
+			expectedBitboard: uint64(524288),
+		},
+		{
+			name:             "a5",
+			column:           0,
+			row:              4,
+			expectedBitboard: uint64(4294967296),
+		},
+		{
+			name:             "b8",
+			column:           1,
+			row:              7,
+			expectedBitboard: uint64(144115188075855872),
+		},
+		{
+			name:             "h2",
+			column:           7,
+			row:              1,
+			expectedBitboard: uint64(32768),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bitboard := BitboardValueFromPosition[tt.column][tt.row]
+
+			assert.Equal(t, tt.expectedBitboard, bitboard, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, bitboard))
+		})
+	}
+}
+
+func TestBitboardValueFromIndex(t *testing.T) {
+	tests := []struct {
+		name             string
+		index            int
+		row              int
+		expectedBitboard uint64
+	}{
+		{
+			name:             "First (a1)",
+			index:            0,
+			expectedBitboard: uint64(1),
+		},
+		{
+			name:             "Last (h8)",
+			index:            63,
+			expectedBitboard: uint64(9223372036854775808),
+		},
+		{
+			name:             "f2",
+			index:            13,
+			expectedBitboard: uint64(8192),
+		},
+		{
+			name:             "d3",
+			index:            19,
+			expectedBitboard: uint64(524288),
+		},
+		{
+			name:             "a5",
+			index:            32,
+			expectedBitboard: uint64(4294967296),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bitboard := BitboardValueFromIndex[tt.index]
+
+			assert.Equal(t, tt.expectedBitboard, bitboard, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, bitboard))
+		})
+	}
 }
