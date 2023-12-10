@@ -9,65 +9,75 @@ import (
 
 func TestGetSquareIndexFromBitboard(t *testing.T) {
 	tests := []struct {
-		name                   string
-		bitboard               uint64
-		expectedSplitBitboards []uint64
+		name          string
+		bitboard      uint64
+		expectedIndex byte
 	}{
 		{
-			name:                   "Only 1 (a1)",
-			bitboard:               uint64(1),
-			expectedSplitBitboards: []uint64{uint64(1)},
+			name:          "First (a1)",
+			bitboard:      uint64(1),
+			expectedIndex: 0,
 		},
 		{
-			name:                   "Only 1 (h8)",
-			bitboard:               uint64(9223372036854775808),
-			expectedSplitBitboards: []uint64{uint64(9223372036854775808)},
+			name:          "Last (h8)",
+			bitboard:      uint64(9223372036854775808),
+			expectedIndex: 63,
 		},
 		{
-			name:                   "Only 1 (c4)",
-			bitboard:               uint64(67108864),
-			expectedSplitBitboards: []uint64{uint64(67108864)},
+			name:          "e4",
+			bitboard:      uint64(268435456),
+			expectedIndex: 28,
 		},
 		{
-			name:                   "Split 2 - a1 and h8",
-			bitboard:               uint64(9223372036854775809),
-			expectedSplitBitboards: []uint64{uint64(1), uint64(9223372036854775808)},
+			name:          "b6",
+			bitboard:      uint64(2199023255552),
+			expectedIndex: 41,
 		},
 		{
-			name:                   "Split 2 - d4 and e4",
-			bitboard:               uint64(402653184),
-			expectedSplitBitboards: []uint64{uint64(134217728), uint64(268435456)},
+			name:          "h6",
+			bitboard:      uint64(140737488355328),
+			expectedIndex: 47,
 		},
 		{
-			name:                   "Split 3 - f8, g8 and h8",
-			bitboard:               uint64(16140901064495857664),
-			expectedSplitBitboards: []uint64{uint64(2305843009213693952), uint64(4611686018427387904), uint64(9223372036854775808)},
-		},
-		{
-			name:                   "Split 3 - b2, e5 and b8",
-			bitboard:               uint64(144115256795333120),
-			expectedSplitBitboards: []uint64{uint64(512), uint64(68719476736), uint64(144115188075855872)},
-		},
-		{
-			name:     "Split a lot - b2, d2, h2, c3, g3, b6, e6, d7",
-			bitboard: uint64(2271591027476992),
-			expectedSplitBitboards: []uint64{
-				uint64(512),
-				uint64(2048),
-				uint64(32768),
-				uint64(262144),
-				uint64(4194304),
-				uint64(2199023255552),
-				uint64(17592186044416),
-				uint64(2251799813685248)},
+			name:          "a8",
+			bitboard:      uint64(72057594037927936),
+			expectedIndex: 56,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			splitBitboards := SplitBitboard(tt.bitboard)
+			index := getSquareIndexFromBitboard(tt.bitboard)
 
-			assert.Equal(t, tt.expectedSplitBitboards, splitBitboards, fmt.Errorf("Expected %d got %d", tt.expectedSplitBitboards, splitBitboards))
+			assert.Equal(t, tt.expectedIndex, index, fmt.Errorf("Expected %d got %d", tt.expectedIndex, index))
+		})
+	}
+}
+
+func TestGetSquareIndexesFromBitboard(t *testing.T) {
+	tests := []struct {
+		name            string
+		bitboard        uint64
+		expectedIndexes []byte
+	}{
+		{
+			name:            "a1 and h8",
+			bitboard:        uint64(9223372036854775809),
+			expectedIndexes: []byte{0, 63},
+		},
+
+		{
+			name:            "b3. e5, a6, e8",
+			bitboard:        uint64(1152922672838082560),
+			expectedIndexes: []byte{17, 36, 40, 60},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			indexes := GetSquareIndexesFromBitboard(tt.bitboard)
+
+			assert.Equal(t, tt.expectedIndexes, indexes, fmt.Errorf("Expected %d got %d", tt.expectedIndexes, indexes))
 		})
 	}
 }
