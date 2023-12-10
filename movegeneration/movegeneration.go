@@ -61,41 +61,25 @@ func calculateWhiteKnightMoves(gameBoard *boardrepresentation.GameBoard) ([]Piec
 		possibleMoves := ValidKnightMoves[currentPosition]
 		splitMoves := bitboardoperations.SplitBitboard(possibleMoves)
 
-		// Temp so I can use the values
-		_ = PieceMove{
-			PositionBitboard: pieceBitboard,
-			MovesBitboard:    possibleMoves,
-			PieceType:        pieceType,
-			MoveType:         0,
-		}
-
 		for _, move := range splitMoves {
 			if (move & gameBoard.UsefulBitboards.AllBlackOccupiedSquares) > 0 {
 				moves = append(moves, PieceMove{
 					PositionBitboard: pieceBitboard,
-					MovesBitboard:    move,
+					MoveBitboard:     move,
 					PieceType:        pieceType,
 					MoveType:         boardrepresentation.CaptureMoveType,
 				})
-			} else if (move & gameBoard.UsefulBitboards.EmptySquares) > 0 {
+			}
+
+			if (move & gameBoard.UsefulBitboards.EmptySquares) > 0 {
 				moves = append(moves, PieceMove{
 					PositionBitboard: pieceBitboard,
-					MovesBitboard:    move,
+					MoveBitboard:     move,
 					PieceType:        pieceType,
 					MoveType:         boardrepresentation.NormalMoveType,
 				})
 			}
 		}
-
-		// Calculate possible moves bitboard
-		// Split moves
-
-		// for each move
-		//    if move & all black occupied squares > 0
-		//       Add as a capture move
-		//
-		//   if move & Empty squares > 0
-		//      Add as normal move
 
 		index--
 	}
