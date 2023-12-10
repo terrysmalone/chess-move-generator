@@ -61,10 +61,20 @@ func TestCalculateWhiteKnightMoves(t *testing.T) {
 				getNormalKnightMove(uint64(1125899906842624), uint64(1152921504606846976)), // c7-e8
 			},
 		},
-		// TODO: One capturing Pieces
-		// TODO: Multi capturing Pieces
-		// TODO: One blocked by own piece
-		// TODO: multipl blocked by own piece
+		{
+			name: "One piece capturing and blocked (h4)",
+			board: boardrepresentation.Board{
+				WhiteKnights: uint64(2147483648),     // h4
+				WhitePawns:   uint64(2117632),        // e2, f3(blocking), g2(blocking)
+				BlackBishops: uint64(70368878395392), // d4, g6(capturable)
+
+			},
+			expectedMoves: []PieceMove{
+				getCapturingKnightMove(uint64(2147483648), uint64(70368744177664)), // h4-g6 (capture)
+				getNormalKnightMove(uint64(2147483648), uint64(137438953472)),      // a3-f5
+
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -93,5 +103,14 @@ func getNormalKnightMove(from, to uint64) PieceMove {
 		MoveBitboard:     to,
 		PieceType:        boardrepresentation.KnightPieceType,
 		MoveType:         boardrepresentation.NormalMoveType,
+	}
+}
+
+func getCapturingKnightMove(from, to uint64) PieceMove {
+	return PieceMove{
+		PositionBitboard: from,
+		MoveBitboard:     to,
+		PieceType:        boardrepresentation.KnightPieceType,
+		MoveType:         boardrepresentation.CaptureMoveType,
 	}
 }
