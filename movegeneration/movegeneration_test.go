@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/terrysmalone/chess-move-generator/boardrepresentation"
 )
 
@@ -13,7 +12,6 @@ func TestCalculateWhiteKnightMoves(t *testing.T) {
 		name          string
 		board         boardrepresentation.Board
 		expectedMoves []PieceMove
-		expectedError error
 	}{
 		{
 			name: "One in middle of board (d5)",
@@ -84,15 +82,15 @@ func TestCalculateWhiteKnightMoves(t *testing.T) {
 			}
 			gameBoard.CalculateUsefulBitboards()
 
-			moves, err := calculateWhiteKnightMoves(gameBoard)
+			moves := &[]PieceMove{}
+			calculateKnightMoves(moves,
+				gameBoard.Board.WhiteKnights,
+				gameBoard.UsefulBitboards.AllBlackOccupiedSquares,
+				gameBoard.UsefulBitboards.EmptySquares)
 
-			if tt.expectedError != nil {
-				require.EqualError(t, err, tt.expectedError.Error())
-			} else {
-				require.NoError(t, err)
-			}
-
-			assert.ElementsMatch(t, tt.expectedMoves, moves)
+			//expected := tt.expectedMoves
+			//actual := *moves
+			assert.ElementsMatch(t, tt.expectedMoves, *moves)
 		})
 	}
 }

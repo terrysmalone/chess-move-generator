@@ -9,7 +9,8 @@ import (
 func CalculateAllMoves(gameBoard *boardrepresentation.GameBoard) {
 	gameBoard.CalculateUsefulBitboards()
 
-	allMoves := calculateAllPseudoLegalMoves(gameBoard)
+	allMoves := []PieceMove{}
+	calculateAllPseudoLegalMoves(gameBoard, &allMoves)
 
 	removeSelfCheckingMoves(gameBoard, &allMoves)
 
@@ -18,12 +19,16 @@ func CalculateAllMoves(gameBoard *boardrepresentation.GameBoard) {
 
 // calculateAllPseudoLegalMoves returns all possible pseudo legal moves from the given postion.
 // This will include self-checking moves
-func calculateAllPseudoLegalMoves(gameBoard *boardrepresentation.GameBoard) []PieceMove {
+func calculateAllPseudoLegalMoves(gameBoard *boardrepresentation.GameBoard, pieceMoves *[]PieceMove) []PieceMove {
 
 	allMoves := []PieceMove{}
 
 	if gameBoard.WhiteToMove {
-		calculateWhiteKnightMoves(gameBoard)
+		calculateKnightMoves(
+			&allMoves,
+			gameBoard.Board.WhiteKnights,
+			gameBoard.UsefulBitboards.AllBlackOccupiedSquares,
+			gameBoard.UsefulBitboards.EmptySquares)
 		// calculateBishopMoves
 		// calculateRookMoves
 		// calculateQueenMoves
@@ -32,7 +37,11 @@ func calculateAllPseudoLegalMoves(gameBoard *boardrepresentation.GameBoard) []Pi
 
 		// calculateWhiteCastlingMoves
 	} else {
-		// calculateBlackKnigthMoves(gameBoard.Board.WhiteKnightMoves)
+		calculateKnightMoves(
+			&allMoves,
+			gameBoard.Board.BlackKnights,
+			gameBoard.UsefulBitboards.AllWhiteOccupiedSquares,
+			gameBoard.UsefulBitboards.EmptySquares)
 		// calculateBishopMoves
 		// calculateRookMoves
 		// calculateQueenMoves
@@ -44,16 +53,14 @@ func calculateAllPseudoLegalMoves(gameBoard *boardrepresentation.GameBoard) []Pi
 	return allMoves
 }
 
-func calculateWhiteKnightMoves(gameBoard *boardrepresentation.GameBoard) ([]PieceMove, error) {
-	moves := []PieceMove{}
-	// Get whiteKnightPositions from bitboard
-	whiteKnightIndexes := bitboardoperations.GetSquareIndexesFromBitboard(gameBoard.Board.WhiteKnights)
+func calculateKnightMoves(pieceMoves *[]PieceMove, knights, enemyOccupied, emptySquares uint64) {
+	knightIndexes := bitboardoperations.GetSquareIndexesFromBitboard(knights)
 
 	// We need to iterate through the positions backwards
-	index := len(whiteKnightIndexes) - 1
+	index := len(knightIndexes) - 1
 
 	for index >= 0 {
-		currentPosition := whiteKnightIndexes[index]
+		currentPosition := knightIndexes[index]
 
 		pieceBitboard := lookuptables.BitboardValueFromIndex[currentPosition]
 		pieceType := boardrepresentation.KnightPieceType
@@ -62,8 +69,8 @@ func calculateWhiteKnightMoves(gameBoard *boardrepresentation.GameBoard) ([]Piec
 		splitMoves := bitboardoperations.SplitBitboard(possibleMoves)
 
 		for _, move := range splitMoves {
-			if (move & gameBoard.UsefulBitboards.AllBlackOccupiedSquares) > 0 {
-				moves = append(moves, PieceMove{
+			if (move & enemyOccupied) > 0 {
+				*pieceMoves = append(*pieceMoves, PieceMove{
 					PositionBitboard: pieceBitboard,
 					MoveBitboard:     move,
 					PieceType:        pieceType,
@@ -71,8 +78,8 @@ func calculateWhiteKnightMoves(gameBoard *boardrepresentation.GameBoard) ([]Piec
 				})
 			}
 
-			if (move & gameBoard.UsefulBitboards.EmptySquares) > 0 {
-				moves = append(moves, PieceMove{
+			if (move & emptySquares) > 0 {
+				*pieceMoves = append(*pieceMoves, PieceMove{
 					PositionBitboard: pieceBitboard,
 					MoveBitboard:     move,
 					PieceType:        pieceType,
@@ -83,8 +90,6 @@ func calculateWhiteKnightMoves(gameBoard *boardrepresentation.GameBoard) ([]Piec
 
 		index--
 	}
-
-	return moves, nil
 }
 
 // Note: We want to change the slice in place since passing the slice by value and then returning a new slice will
