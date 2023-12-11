@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/terrysmalone/chess-move-generator/boardrepresentation"
 )
 
@@ -13,7 +12,6 @@ func TestCalculateWhiteKnightMoves(t *testing.T) {
 		name          string
 		board         boardrepresentation.Board
 		expectedMoves []PieceMove
-		expectedError error
 	}{
 		{
 			name: "One in middle of board (d5)",
@@ -84,15 +82,83 @@ func TestCalculateWhiteKnightMoves(t *testing.T) {
 			}
 			gameBoard.CalculateUsefulBitboards()
 
-			moves, err := calculateWhiteKnightMoves(gameBoard)
+			moves := &[]PieceMove{}
+			calculateKnightMoves(moves,
+				gameBoard.Board.WhiteKnights,
+				gameBoard.UsefulBitboards.AllBlackOccupiedSquares,
+				gameBoard.UsefulBitboards.EmptySquares)
 
-			if tt.expectedError != nil {
-				require.EqualError(t, err, tt.expectedError.Error())
-			} else {
-				require.NoError(t, err)
+			assert.ElementsMatch(t, tt.expectedMoves, *moves)
+		})
+	}
+}
+
+func TestCalculateBlackKnightMoves(t *testing.T) {
+	tests := []struct {
+		name          string
+		board         boardrepresentation.Board
+		expectedMoves []PieceMove
+	}{
+		{
+			name: "One in middle of board (c4)",
+			board: boardrepresentation.Board{
+				BlackKnights: uint64(67108864),
+			},
+			expectedMoves: []PieceMove{
+				getNormalKnightMove(uint64(67108864), uint64(65536)),         // c4-a3
+				getNormalKnightMove(uint64(67108864), uint64(4294967296)),    // c4-a5
+				getNormalKnightMove(uint64(67108864), uint64(512)),           // c4-b2
+				getNormalKnightMove(uint64(67108864), uint64(2199023255552)), // c4-b6
+				getNormalKnightMove(uint64(67108864), uint64(8796093022208)), // c4-d6
+				getNormalKnightMove(uint64(67108864), uint64(2048)),          // c4-d2
+				getNormalKnightMove(uint64(67108864), uint64(1048576)),       // c4-e3
+				getNormalKnightMove(uint64(67108864), uint64(68719476736)),   // c4-e5
+			},
+		},
+		{
+			name: "One on edge of board (h1)",
+			board: boardrepresentation.Board{
+				BlackKnights: uint64(128),
+			},
+			expectedMoves: []PieceMove{
+				getNormalKnightMove(uint64(128), uint64(4194304)), // h1-g3
+				getNormalKnightMove(uint64(128), uint64(8192)),    // h1-f2
+			},
+		},
+		{
+			name: "Two pieces with overlap (a3, c7)",
+			board: boardrepresentation.Board{
+				BlackKnights: uint64(1125899906908160),
+			},
+			expectedMoves: []PieceMove{
+				getNormalKnightMove(uint64(65536), uint64(8589934592)),                     // a3-b5
+				getNormalKnightMove(uint64(65536), uint64(67108864)),                       // a3-c4
+				getNormalKnightMove(uint64(65536), uint64(1024)),                           // a3-c2
+				getNormalKnightMove(uint64(65536), uint64(2)),                              // a3-b1
+				getNormalKnightMove(uint64(1125899906842624), uint64(72057594037927936)),   // c7-a8
+				getNormalKnightMove(uint64(1125899906842624), uint64(1099511627776)),       // c7-a6
+				getNormalKnightMove(uint64(1125899906842624), uint64(8589934592)),          // c7-b5
+				getNormalKnightMove(uint64(1125899906842624), uint64(34359738368)),         // c7-d5
+				getNormalKnightMove(uint64(1125899906842624), uint64(17592186044416)),      // c7-e6
+				getNormalKnightMove(uint64(1125899906842624), uint64(1152921504606846976)), // c7-e8
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gameBoard := &boardrepresentation.GameBoard{
+				Board: tt.board,
 			}
+			gameBoard.CalculateUsefulBitboards()
 
-			assert.ElementsMatch(t, tt.expectedMoves, moves)
+			moves := &[]PieceMove{}
+			calculateKnightMoves(moves,
+				gameBoard.Board.BlackKnights,
+				gameBoard.UsefulBitboards.AllWhiteOccupiedSquares,
+				gameBoard.UsefulBitboards.EmptySquares)
+
+			assert.ElementsMatch(t, tt.expectedMoves, *moves)
 		})
 	}
 }
