@@ -81,6 +81,8 @@ var BitboardValueFromIndex [64]uint64
 func init() {
 	initialiseBitboardValueFromPosition()
 	initialiseBitboardValueFromIndex()
+
+	calculateDirectionBoards()
 }
 
 func initialiseBitboardValueFromPosition() {
