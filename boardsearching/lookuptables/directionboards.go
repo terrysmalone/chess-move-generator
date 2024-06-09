@@ -18,7 +18,7 @@ func calculateDirectionBoards() {
 
 	calculateUpRightDirectionBoards()
 	calculateDownRightDirectionBoards()
-	// calculateDownLeftDirectionBoards()
+	calculateDownLeftDirectionBoards()
 	// calculateUpLeftDirectionBoards()
 }
 
@@ -59,7 +59,7 @@ func calculateRightDirectionBoards() {
 }
 
 func calculateDownDirectionBoards() {
-	//Starts at 1 as row 0 will all be empty since there are no up moves
+	//Starts at 1 as row 0 will all be empty since there are no down moves
 	for startRow := 1; startRow < 8; startRow++ {
 		for startColumn := 0; startColumn < 8; startColumn++ {
 			row := startRow - 1
@@ -95,9 +95,9 @@ func calculateLeftDirectionBoards() {
 }
 
 func calculateUpRightDirectionBoards() {
-	// Stops at 6 as row 7 will all be empty since there are no up right moves
+	// Stops at 6 as row 7 will all be empty since there are no up moves
 	for startRow := 0; startRow < 7; startRow++ {
-		// Stops at 6 as column and row 7 will all be empty since there are no up right moves
+		// Stops at 6 as column and row 7 will all be empty since there are no right moves
 		for startColumn := 0; startColumn < 7; startColumn++ {
 			column := startColumn + 1
 			row := startRow + 1
@@ -117,9 +117,9 @@ func calculateUpRightDirectionBoards() {
 }
 
 func calculateDownRightDirectionBoards() {
-	//Starts at 1 as row 0 will all be empty since there are no down right moves
+	//Starts at 1 as row 0 will all be empty since there are no down moves
 	for startRow := 1; startRow < 8; startRow++ {
-		//Stops at 6 as column 7 will all be empty since there are no down right moves
+		//Stops at 6 as column 7 will all be empty since there are no right moves
 		for startColumn := 0; startColumn < 7; startColumn++ {
 			column := startColumn + 1
 			row := startRow - 1
@@ -134,6 +134,28 @@ func calculateDownRightDirectionBoards() {
 			}
 
 			DownRightBoard[(startRow*8)+startColumn] = downRightSquares
+		}
+	}
+}
+
+func calculateDownLeftDirectionBoards() {
+	//Starts at 1 as row 0 will all be empty since there are no down moves
+	for startRow := 1; startRow < 8; startRow++ {
+		//Starts at 1 as column 0 will all be empty since there are no left moves
+		for startColumn := 1; startColumn < 8; startColumn++ {
+			column := startColumn - 1
+			row := startRow - 1
+
+			var downLeftSquares uint64
+
+			for column >= 0 && row >= 0 {
+				downLeftSquares |= BitboardValueFromPosition[column][row]
+
+				column--
+				row--
+			}
+
+			DownLeftBoard[(startRow*8)+startColumn] = downLeftSquares
 		}
 	}
 }

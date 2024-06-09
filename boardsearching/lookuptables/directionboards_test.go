@@ -32,9 +32,9 @@ func TestCalculateUpBoards(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			upBoard := UpBoard[tt.positionIndex]
+			board := UpBoard[tt.positionIndex]
 
-			assert.Equal(t, tt.expectedBitboard, upBoard, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, upBoard))
+			assert.Equal(t, tt.expectedBitboard, board, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, board))
 		})
 	}
 }
@@ -65,9 +65,9 @@ func TestCalculateDownBoards(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			downBoard := DownBoard[tt.positionIndex]
+			board := DownBoard[tt.positionIndex]
 
-			assert.Equal(t, tt.expectedBitboard, downBoard, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, downBoard))
+			assert.Equal(t, tt.expectedBitboard, board, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, board))
 		})
 	}
 }
@@ -98,9 +98,9 @@ func TestCalculateLeftBoards(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			leftBoard := LeftBoard[tt.positionIndex]
+			board := LeftBoard[tt.positionIndex]
 
-			assert.Equal(t, tt.expectedBitboard, leftBoard, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, leftBoard))
+			assert.Equal(t, tt.expectedBitboard, board, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, board))
 		})
 	}
 }
@@ -130,9 +130,9 @@ func TestCalculateRightBoards(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rightBoard := RightBoard[tt.positionIndex]
+			board := RightBoard[tt.positionIndex]
 
-			assert.Equal(t, tt.expectedBitboard, rightBoard, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, rightBoard))
+			assert.Equal(t, tt.expectedBitboard, board, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, board))
 		})
 	}
 }
@@ -172,9 +172,9 @@ func TestCalculateUpRightBoards(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rightBoard := UpRightBoard[tt.positionIndex]
+			board := UpRightBoard[tt.positionIndex]
 
-			assert.Equal(t, tt.expectedBitboard, rightBoard, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, rightBoard))
+			assert.Equal(t, tt.expectedBitboard, board, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, board))
 		})
 	}
 }
@@ -214,9 +214,51 @@ func TestCalculateDownRightBoards(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rightBoard := DownRightBoard[tt.positionIndex]
+			board := DownRightBoard[tt.positionIndex]
 
-			assert.Equal(t, tt.expectedBitboard, rightBoard, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, rightBoard))
+			assert.Equal(t, tt.expectedBitboard, board, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, board))
+		})
+	}
+}
+
+func TestCalculateDownLeftBoards(t *testing.T) {
+	tests := []struct {
+		name             string
+		positionIndex    int
+		expectedBitboard uint64
+	}{
+		{
+			name:             "h5 (right column)",
+			positionIndex:    39,
+			expectedBitboard: uint64(1075843080),
+		},
+		{
+			name:             "a8",
+			positionIndex:    56,
+			expectedBitboard: uint64(0),
+		},
+		{
+			name:             "a1",
+			positionIndex:    0,
+			expectedBitboard: uint64(0),
+		},
+		{
+			name:             "b5",
+			positionIndex:    33,
+			expectedBitboard: uint64(16777216),
+		},
+		{
+			name:             "g2",
+			positionIndex:    14,
+			expectedBitboard: uint64(32),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			board := DownLeftBoard[tt.positionIndex]
+
+			assert.Equal(t, tt.expectedBitboard, board, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, board))
 		})
 	}
 }
