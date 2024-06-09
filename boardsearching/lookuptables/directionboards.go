@@ -19,7 +19,7 @@ func calculateDirectionBoards() {
 	calculateUpRightDirectionBoards()
 	calculateDownRightDirectionBoards()
 	calculateDownLeftDirectionBoards()
-	// calculateUpLeftDirectionBoards()
+	calculateUpLeftDirectionBoards()
 }
 
 func calculateUpDirectionBoards() {
@@ -156,6 +156,28 @@ func calculateDownLeftDirectionBoards() {
 			}
 
 			DownLeftBoard[(startRow*8)+startColumn] = downLeftSquares
+		}
+	}
+}
+
+func calculateUpLeftDirectionBoards() {
+	// Only goes to 7 as row 8 will all be empty since there are no up moves
+	for startRow := 0; startRow < 7; startRow++ {
+		//Starts at 1 as column 0 will all be empty since there are no left moves
+		for startColumn := 1; startColumn < 8; startColumn++ {
+			column := startColumn - 1
+			row := startRow + 1
+
+			var upLeftSquares uint64
+
+			for column >= 0 && row < 8 {
+				upLeftSquares |= BitboardValueFromPosition[column][row]
+
+				column--
+				row++
+			}
+
+			UpLeftBoard[(startRow*8)+startColumn] = upLeftSquares
 		}
 	}
 }

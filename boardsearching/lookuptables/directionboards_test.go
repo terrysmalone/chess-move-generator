@@ -262,3 +262,45 @@ func TestCalculateDownLeftBoards(t *testing.T) {
 		})
 	}
 }
+
+func TestCalculateUpLeftBoards(t *testing.T) {
+	tests := []struct {
+		name             string
+		positionIndex    int
+		expectedBitboard uint64
+	}{
+		{
+			name:             "h5 (right column)",
+			positionIndex:    39,
+			expectedBitboard: uint64(1161999072605765632),
+		},
+		{
+			name:             "a8",
+			positionIndex:    56,
+			expectedBitboard: uint64(0),
+		},
+		{
+			name:             "a1",
+			positionIndex:    0,
+			expectedBitboard: uint64(0),
+		},
+		{
+			name:             "b5",
+			positionIndex:    33,
+			expectedBitboard: uint64(1099511627776),
+		},
+		{
+			name:             "g2",
+			positionIndex:    14,
+			expectedBitboard: uint64(72624976668131328),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			board := UpLeftBoard[tt.positionIndex]
+
+			assert.Equal(t, tt.expectedBitboard, board, fmt.Errorf("Expected %d got %d", tt.expectedBitboard, board))
+		})
+	}
+}
