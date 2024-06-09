@@ -18,46 +18,64 @@ func TestCalculateWhiteKnightMoves(t *testing.T) {
 			board: boardrepresentation.Board{
 				WhiteKnights: uint64(34359738368),
 			},
-			expectedMoves: []PieceMove{
-				getNormalKnightMove(uint64(34359738368), uint64(1125899906842624)), // d5-c7
-				getNormalKnightMove(uint64(34359738368), uint64(2199023255552)),    // d5-b6
-				getNormalKnightMove(uint64(34359738368), uint64(33554432)),         // d5-c7
-				getNormalKnightMove(uint64(34359738368), uint64(262144)),           // d5-c3
-				getNormalKnightMove(uint64(34359738368), uint64(1048576)),          // d5-e3
-				getNormalKnightMove(uint64(34359738368), uint64(536870912)),        // d5-f4
-				getNormalKnightMove(uint64(34359738368), uint64(35184372088832)),   // d5-f6
-				getNormalKnightMove(uint64(34359738368), uint64(4503599627370496)), // d5-e7
-			},
+			expectedMoves: getMoves(
+				boardrepresentation.KnightPieceType,
+				uint64(34359738368),
+				[]uint64{
+					uint64(1125899906842624),
+					uint64(2199023255552),
+					uint64(33554432),
+					uint64(262144),
+					uint64(1048576),
+					uint64(536870912),
+					uint64(35184372088832),
+					uint64(4503599627370496),
+				},
+				[]uint64{}),
 		},
 		{
 			name: "One on edge of board (a7)",
 			board: boardrepresentation.Board{
 				WhiteKnights: uint64(281474976710656),
 			},
-			expectedMoves: []PieceMove{
-				getNormalKnightMove(uint64(281474976710656), uint64(288230376151711744)), // a7-c8
-				getNormalKnightMove(uint64(281474976710656), uint64(4398046511104)),      // a7-c6
-				getNormalKnightMove(uint64(281474976710656), uint64(8589934592)),         // a7-b5
-
-			},
+			expectedMoves: getMoves(
+				boardrepresentation.KnightPieceType,
+				uint64(281474976710656),
+				[]uint64{
+					uint64(288230376151711744),
+					uint64(4398046511104),
+					uint64(8589934592),
+				},
+				[]uint64{}),
 		},
 		{
 			name: "Two pieces with overlap (a3, c7)",
 			board: boardrepresentation.Board{
 				WhiteKnights: uint64(1125899906908160),
 			},
-			expectedMoves: []PieceMove{
-				getNormalKnightMove(uint64(65536), uint64(8589934592)),                     // a3-b5
-				getNormalKnightMove(uint64(65536), uint64(67108864)),                       // a3-c4
-				getNormalKnightMove(uint64(65536), uint64(1024)),                           // a3-c2
-				getNormalKnightMove(uint64(65536), uint64(2)),                              // a3-b1
-				getNormalKnightMove(uint64(1125899906842624), uint64(72057594037927936)),   // c7-a8
-				getNormalKnightMove(uint64(1125899906842624), uint64(1099511627776)),       // c7-a6
-				getNormalKnightMove(uint64(1125899906842624), uint64(8589934592)),          // c7-b5
-				getNormalKnightMove(uint64(1125899906842624), uint64(34359738368)),         // c7-d5
-				getNormalKnightMove(uint64(1125899906842624), uint64(17592186044416)),      // c7-e6
-				getNormalKnightMove(uint64(1125899906842624), uint64(1152921504606846976)), // c7-e8
-			},
+			expectedMoves: append(
+				getMoves(
+					boardrepresentation.KnightPieceType,
+					uint64(65536),
+					[]uint64{
+						uint64(8589934592),
+						uint64(67108864),
+						uint64(1024),
+						uint64(2),
+					},
+					[]uint64{}),
+				getMoves(
+					boardrepresentation.KnightPieceType,
+					uint64(1125899906842624),
+					[]uint64{
+						uint64(72057594037927936),
+						uint64(1099511627776),
+						uint64(8589934592),
+						uint64(34359738368),
+						uint64(17592186044416),
+						uint64(1152921504606846976),
+					},
+					[]uint64{})...),
 		},
 		{
 			name: "One piece capturing and blocked (h4)",
@@ -67,11 +85,15 @@ func TestCalculateWhiteKnightMoves(t *testing.T) {
 				BlackBishops: uint64(70368878395392), // d4, g6(capturable)
 
 			},
-			expectedMoves: []PieceMove{
-				getCapturingKnightMove(uint64(2147483648), uint64(70368744177664)), // h4-g6 (capture)
-				getNormalKnightMove(uint64(2147483648), uint64(137438953472)),      // a3-f5
-
-			},
+			expectedMoves: getMoves(
+				boardrepresentation.KnightPieceType,
+				uint64(2147483648),
+				[]uint64{
+					uint64(137438953472),
+				},
+				[]uint64{
+					uint64(70368744177664),
+				}),
 		},
 	}
 
@@ -104,44 +126,63 @@ func TestCalculateBlackKnightMoves(t *testing.T) {
 			board: boardrepresentation.Board{
 				BlackKnights: uint64(67108864),
 			},
-			expectedMoves: []PieceMove{
-				getNormalKnightMove(uint64(67108864), uint64(65536)),         // c4-a3
-				getNormalKnightMove(uint64(67108864), uint64(4294967296)),    // c4-a5
-				getNormalKnightMove(uint64(67108864), uint64(512)),           // c4-b2
-				getNormalKnightMove(uint64(67108864), uint64(2199023255552)), // c4-b6
-				getNormalKnightMove(uint64(67108864), uint64(8796093022208)), // c4-d6
-				getNormalKnightMove(uint64(67108864), uint64(2048)),          // c4-d2
-				getNormalKnightMove(uint64(67108864), uint64(1048576)),       // c4-e3
-				getNormalKnightMove(uint64(67108864), uint64(68719476736)),   // c4-e5
-			},
+			expectedMoves: getMoves(
+				boardrepresentation.KnightPieceType,
+				uint64(67108864),
+				[]uint64{
+					uint64(65536),
+					uint64(4294967296),
+					uint64(512),
+					uint64(2199023255552),
+					uint64(8796093022208),
+					uint64(2048),
+					uint64(1048576),
+					uint64(68719476736),
+				},
+				[]uint64{}),
 		},
 		{
 			name: "One on edge of board (h1)",
 			board: boardrepresentation.Board{
 				BlackKnights: uint64(128),
 			},
-			expectedMoves: []PieceMove{
-				getNormalKnightMove(uint64(128), uint64(4194304)), // h1-g3
-				getNormalKnightMove(uint64(128), uint64(8192)),    // h1-f2
-			},
+			expectedMoves: getMoves(
+				boardrepresentation.KnightPieceType,
+				uint64(128),
+				[]uint64{
+					uint64(4194304),
+					uint64(8192),
+				},
+				[]uint64{}),
 		},
 		{
 			name: "Two pieces with overlap (a3, c7)",
 			board: boardrepresentation.Board{
 				BlackKnights: uint64(1125899906908160),
 			},
-			expectedMoves: []PieceMove{
-				getNormalKnightMove(uint64(65536), uint64(8589934592)),                     // a3-b5
-				getNormalKnightMove(uint64(65536), uint64(67108864)),                       // a3-c4
-				getNormalKnightMove(uint64(65536), uint64(1024)),                           // a3-c2
-				getNormalKnightMove(uint64(65536), uint64(2)),                              // a3-b1
-				getNormalKnightMove(uint64(1125899906842624), uint64(72057594037927936)),   // c7-a8
-				getNormalKnightMove(uint64(1125899906842624), uint64(1099511627776)),       // c7-a6
-				getNormalKnightMove(uint64(1125899906842624), uint64(8589934592)),          // c7-b5
-				getNormalKnightMove(uint64(1125899906842624), uint64(34359738368)),         // c7-d5
-				getNormalKnightMove(uint64(1125899906842624), uint64(17592186044416)),      // c7-e6
-				getNormalKnightMove(uint64(1125899906842624), uint64(1152921504606846976)), // c7-e8
-			},
+			expectedMoves: append(
+				getMoves(
+					boardrepresentation.KnightPieceType,
+					uint64(65536),
+					[]uint64{
+						uint64(8589934592),
+						uint64(67108864),
+						uint64(1024),
+						uint64(2),
+					},
+					[]uint64{}),
+				getMoves(
+					boardrepresentation.KnightPieceType,
+					uint64(1125899906842624),
+					[]uint64{
+						uint64(72057594037927936),
+						uint64(1099511627776),
+						uint64(8589934592),
+						uint64(34359738368),
+						uint64(17592186044416),
+						uint64(1152921504606846976),
+					},
+					[]uint64{})...),
 		},
 	}
 
@@ -163,20 +204,76 @@ func TestCalculateBlackKnightMoves(t *testing.T) {
 	}
 }
 
-func getNormalKnightMove(from, to uint64) PieceMove {
-	return PieceMove{
-		PositionBitboard: from,
-		MoveBitboard:     to,
-		PieceType:        boardrepresentation.KnightPieceType,
-		MoveType:         boardrepresentation.NormalMoveType,
+func TestCalculateWhiteBishopMoves(t *testing.T) {
+	tests := []struct {
+		name          string
+		board         boardrepresentation.Board
+		expectedMoves []PieceMove
+	}{
+		{
+			name: "One in middle of board e4)",
+			board: boardrepresentation.Board{
+				WhiteBishops: uint64(268435456),
+			},
+			expectedMoves: getMoves(
+				boardrepresentation.BishopPieceType,
+				uint64(268435456),
+				[]uint64{
+					34359738368,
+					4398046511104,
+					562949953421312,
+					72057594037927936,
+					2097152,
+					16384,
+					128,
+					524288,
+					1024,
+					2,
+					137438953472,
+					70368744177664,
+					36028797018963968},
+				[]uint64{}),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gameBoard := &boardrepresentation.GameBoard{
+				Board: tt.board,
+			}
+			gameBoard.CalculateUsefulBitboards()
+
+			moves := &[]PieceMove{}
+			calculateBishopMoves(moves,
+				gameBoard.Board.WhiteBishops,
+				&gameBoard.UsefulBitboards,
+				true)
+
+			assert.ElementsMatch(t, tt.expectedMoves, *moves)
+		})
 	}
 }
 
-func getCapturingKnightMove(from, to uint64) PieceMove {
-	return PieceMove{
-		PositionBitboard: from,
-		MoveBitboard:     to,
-		PieceType:        boardrepresentation.KnightPieceType,
-		MoveType:         boardrepresentation.CaptureMoveType,
+func getMoves(pieceType boardrepresentation.PieceType, from uint64, normalToMoves, attackToMoves []uint64) []PieceMove {
+	pieceMoves := []PieceMove{}
+
+	for _, to := range normalToMoves {
+		pieceMoves = append(pieceMoves, PieceMove{
+			PositionBitboard: from,
+			MoveBitboard:     to,
+			PieceType:        pieceType,
+			MoveType:         boardrepresentation.NormalMoveType,
+		})
 	}
+
+	for _, to := range attackToMoves {
+		pieceMoves = append(pieceMoves, PieceMove{
+			PositionBitboard: from,
+			MoveBitboard:     to,
+			PieceType:        pieceType,
+			MoveType:         boardrepresentation.CaptureMoveType,
+		})
+	}
+
+	return pieceMoves
 }

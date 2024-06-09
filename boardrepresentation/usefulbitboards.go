@@ -5,4 +5,7 @@ type UsefulBitboards struct {
 	AllBlackOccupiedSquares uint64
 	AllOccupiedSquares      uint64
 	EmptySquares            uint64
+
+	WhiteOrEmpty uint64
+	BlackOrEmpty uint64
 }
