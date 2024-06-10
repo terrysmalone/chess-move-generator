@@ -211,7 +211,7 @@ func TestCalculateWhiteBishopMoves(t *testing.T) {
 		expectedMoves []PieceMove
 	}{
 		{
-			name: "One in middle of board e4)",
+			name: "One in middle of board - e4",
 			board: boardrepresentation.Board{
 				WhiteBishops: uint64(268435456),
 			},
@@ -233,6 +233,60 @@ func TestCalculateWhiteBishopMoves(t *testing.T) {
 					70368744177664,
 					36028797018963968},
 				[]uint64{}),
+		},
+		{
+			name: "Two bishops blocking each other - c3 and f6",
+			board: boardrepresentation.Board{
+				WhiteBishops: uint64(35184372350976),
+			},
+			expectedMoves: append(
+				getMoves(
+					boardrepresentation.BishopPieceType,
+					uint64(262144),
+					[]uint64{
+						512,
+						1,
+						134217728,
+						68719476736,
+						2048,
+						16,
+						33554432,
+						4294967296,
+					},
+					[]uint64{}),
+				getMoves(
+					boardrepresentation.BishopPieceType,
+					uint64(35184372088832),
+					[]uint64{
+						18014398509481984,
+						9223372036854775808,
+						274877906944,
+						2147483648,
+						4503599627370496,
+						576460752303423488,
+						68719476736,
+						134217728,
+					},
+					[]uint64{})...),
+		},
+		{
+			name: "One with captures",
+			board: boardrepresentation.Board{
+				WhiteBishops: uint64(1099511627776),      // a6
+				BlackQueens:  uint64(288230376151711744), // c8
+				BlackKing:    uint64(67108864),           // c4
+			},
+			expectedMoves: getMoves(
+				boardrepresentation.BishopPieceType,
+				uint64(1099511627776),
+				[]uint64{
+					562949953421312, // b7
+					8589934592,      // b5
+				},
+				[]uint64{
+					288230376151711744, // c8
+					67108864,           // c4 (at this stage capturing a king counts as a move)
+				}),
 		},
 	}
 
