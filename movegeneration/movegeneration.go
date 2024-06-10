@@ -4,6 +4,7 @@ import (
 	"github.com/terrysmalone/chess-move-generator/boardrepresentation"
 	"github.com/terrysmalone/chess-move-generator/boardrepresentation/bitboardoperations"
 	"github.com/terrysmalone/chess-move-generator/boardsearching/lookuptables"
+	"github.com/terrysmalone/chess-move-generator/boardsearching/piecechecking"
 )
 
 func CalculateAllMoves(gameBoard *boardrepresentation.GameBoard) {
@@ -29,7 +30,12 @@ func calculateAllPseudoLegalMoves(gameBoard *boardrepresentation.GameBoard, piec
 			gameBoard.Board.WhiteKnights,
 			gameBoard.UsefulBitboards.AllBlackOccupiedSquares,
 			gameBoard.UsefulBitboards.EmptySquares)
-		// calculateBishopMoves
+		calculateBishopMoves(
+			&allMoves,
+			gameBoard.Board.WhiteBishops,
+			&gameBoard.UsefulBitboards,
+			true)
+
 		// calculateRookMoves
 		// calculateQueenMoves
 		// calculateWhitePawnMoves
@@ -42,7 +48,11 @@ func calculateAllPseudoLegalMoves(gameBoard *boardrepresentation.GameBoard, piec
 			gameBoard.Board.BlackKnights,
 			gameBoard.UsefulBitboards.AllWhiteOccupiedSquares,
 			gameBoard.UsefulBitboards.EmptySquares)
-		// calculateBishopMoves
+		calculateBishopMoves(
+			&allMoves,
+			gameBoard.Board.WhiteBishops,
+			&gameBoard.UsefulBitboards,
+			false)
 		// calculateRookMoves
 		// calculateQueenMoves
 		// calculateBlackPawnMoves
@@ -54,16 +64,14 @@ func calculateAllPseudoLegalMoves(gameBoard *boardrepresentation.GameBoard, piec
 }
 
 func calculateKnightMoves(pieceMoves *[]PieceMove, knights, enemyOccupied, emptySquares uint64) {
-	knightIndexes := bitboardoperations.GetSquareIndexesFromBitboard(knights)
+	knightsIndexes := bitboardoperations.GetSquareIndexesFromBitboard(knights)
 
-	// We need to iterate through the positions backwards
-	index := len(knightIndexes) - 1
+	index := len(knightsIndexes) - 1
 
 	for index >= 0 {
-		currentPosition := knightIndexes[index]
+		currentPosition := knightsIndexes[index]
 
 		pieceBitboard := lookuptables.BitboardValueFromIndex[currentPosition]
-		pieceType := boardrepresentation.KnightPieceType
 
 		possibleMoves := ValidKnightMoves[currentPosition]
 		splitMoves := bitboardoperations.SplitBitboard(possibleMoves)
@@ -73,7 +81,7 @@ func calculateKnightMoves(pieceMoves *[]PieceMove, knights, enemyOccupied, empty
 				*pieceMoves = append(*pieceMoves, PieceMove{
 					PositionBitboard: pieceBitboard,
 					MoveBitboard:     move,
-					PieceType:        pieceType,
+					PieceType:        boardrepresentation.KnightPieceType,
 					MoveType:         boardrepresentation.CaptureMoveType,
 				})
 			}
@@ -82,13 +90,54 @@ func calculateKnightMoves(pieceMoves *[]PieceMove, knights, enemyOccupied, empty
 				*pieceMoves = append(*pieceMoves, PieceMove{
 					PositionBitboard: pieceBitboard,
 					MoveBitboard:     move,
-					PieceType:        pieceType,
+					PieceType:        boardrepresentation.KnightPieceType,
 					MoveType:         boardrepresentation.NormalMoveType,
 				})
 			}
 		}
 
 		index--
+	}
+}
+
+func calculateBishopMoves(pieceMoves *[]PieceMove, bishops uint64, usefulBitboards *boardrepresentation.UsefulBitboards, whiteToMove bool) {
+	bishopsIndexes := bitboardoperations.GetSquareIndexesFromBitboard(bishops)
+
+	index := len(bishopsIndexes) - 1
+
+	for index >= 0 {
+		currentPosition := bishopsIndexes[index]
+		bishopPosition := lookuptables.BitboardValueFromIndex[currentPosition]
+
+		allowedMoves := piecechecking.CalculateAllowedBishopMoves(usefulBitboards, currentPosition, whiteToMove)
+
+		// Positions in allowed moves and non-emprty squares are captures
+		// (we've already excluded own pieces in CalculateAllowedBishopMoves)
+		captureMoves := allowedMoves & ^usefulBitboards.EmptySquares
+		splitAndAddMoves(pieceMoves, captureMoves, bishopPosition, boardrepresentation.BishopPieceType, boardrepresentation.CaptureMoveType)
+
+		// Positions in allowed moves and emprty squares are non-capture moves
+		normalMoves := allowedMoves & usefulBitboards.EmptySquares
+		splitAndAddMoves(pieceMoves, normalMoves, bishopPosition, boardrepresentation.BishopPieceType, boardrepresentation.NormalMoveType)
+
+		index--
+	}
+}
+
+func splitAndAddMoves(pieceMoves *[]PieceMove, moves uint64, position uint64, pieceType boardrepresentation.PieceType, moveType boardrepresentation.MoveType) {
+	splitMoves := bitboardoperations.SplitBitboard(moves)
+
+	for _, move := range splitMoves {
+		if move > 0 {
+			*pieceMoves = append(
+				*pieceMoves,
+				PieceMove{
+					PositionBitboard: position,
+					MoveBitboard:     move,
+					PieceType:        pieceType,
+					MoveType:         moveType,
+				})
+		}
 	}
 }
 

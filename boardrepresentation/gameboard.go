@@ -43,4 +43,7 @@ func (g *GameBoard) CalculateUsefulBitboards() {
 	g.UsefulBitboards.AllBlackOccupiedSquares = g.Board.BlackPawns | g.Board.BlackKnights | g.Board.BlackBishops | g.Board.BlackRooks | g.Board.BlackQueens | g.Board.BlackKing
 	g.UsefulBitboards.AllOccupiedSquares = g.UsefulBitboards.AllWhiteOccupiedSquares | g.UsefulBitboards.AllBlackOccupiedSquares
 	g.UsefulBitboards.EmptySquares = g.UsefulBitboards.AllOccupiedSquares ^ math.MaxUint64
+
+	g.UsefulBitboards.WhiteOrEmpty = g.UsefulBitboards.AllWhiteOccupiedSquares | g.UsefulBitboards.EmptySquares
+	g.UsefulBitboards.BlackOrEmpty = g.UsefulBitboards.AllBlackOccupiedSquares | g.UsefulBitboards.EmptySquares
 }

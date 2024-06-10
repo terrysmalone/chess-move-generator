@@ -43,6 +43,11 @@ func TestGetSquareIndexFromBitboard(t *testing.T) {
 			bitboard:      uint64(72057594037927936),
 			expectedIndex: 56,
 		},
+		{
+			name:          "e4",
+			bitboard:      uint64(268435456),
+			expectedIndex: 28,
+		},
 	}
 
 	for _, tt := range tests {
@@ -65,11 +70,15 @@ func TestGetSquareIndexesFromBitboard(t *testing.T) {
 			bitboard:        uint64(9223372036854775809),
 			expectedIndexes: []byte{0, 63},
 		},
-
 		{
-			name:            "b3. e5, a6, e8",
+			name:            "b3, e5, a6, e8",
 			bitboard:        uint64(1152922672838082560),
 			expectedIndexes: []byte{17, 36, 40, 60},
+		},
+		{
+			name:            "Just one - e4",
+			bitboard:        uint64(268435456),
+			expectedIndexes: []byte{28},
 		},
 	}
 

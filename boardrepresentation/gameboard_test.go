@@ -41,6 +41,8 @@ func TestCalculateUsefulBitboards(t *testing.T) {
 				AllBlackOccupiedSquares: uint64(0),
 				AllOccupiedSquares:      uint64(0),
 				EmptySquares:            uint64(18446744073709551615),
+				WhiteOrEmpty:            uint64(18446744073709551615),
+				BlackOrEmpty:            uint64(18446744073709551615),
 			},
 		},
 		{
@@ -51,6 +53,8 @@ func TestCalculateUsefulBitboards(t *testing.T) {
 				AllBlackOccupiedSquares: uint64(18446462598732840960),
 				AllOccupiedSquares:      uint64(18446462598732906495),
 				EmptySquares:            uint64(281474976645120),
+				WhiteOrEmpty:            uint64(281474976710655),
+				BlackOrEmpty:            uint64(18446744073709486080),
 			},
 		},
 	}
