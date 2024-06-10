@@ -288,6 +288,7 @@ func TestCalculateWhiteBishopMoves(t *testing.T) {
 					67108864,           // c4 (at this stage capturing a king counts as a move)
 				}),
 		},
+		// TODO: Add tests for BlackBishops
 	}
 
 	for _, tt := range tests {
@@ -307,6 +308,10 @@ func TestCalculateWhiteBishopMoves(t *testing.T) {
 		})
 	}
 }
+
+// TODO: Add tests for Rooks
+
+// TODO: Add tests for Queens
 
 func getMoves(pieceType boardrepresentation.PieceType, from uint64, normalToMoves, attackToMoves []uint64) []PieceMove {
 	pieceMoves := []PieceMove{}
