@@ -308,6 +308,181 @@ func TestCalculateWhiteBishopMoves(t *testing.T) {
 	}
 }
 
+func TestCalculateBlackBishopMoves(t *testing.T) {
+	tests := []struct {
+		name          string
+		board         boardrepresentation.Board
+		expectedMoves []PieceMove
+	}{
+		{
+			name: "Black Bishop",
+			board: boardrepresentation.Board{
+				BlackBishops: uint64(1073741824),     // g4
+				BlackRooks:   uint64(2097152),        // f3
+				WhiteBishops: uint64(17592186044416), // e6
+			},
+			expectedMoves: getMoves(
+				boardrepresentation.BishopPieceType,
+				uint64(1073741824),
+				[]uint64{
+					549755813888, // h5
+					8388608,      // h3
+					137438953472, // f5
+				},
+				[]uint64{
+					17592186044416, // e6
+				}),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gameBoard := &boardrepresentation.GameBoard{
+				Board: tt.board,
+			}
+			gameBoard.CalculateUsefulBitboards()
+
+			moves := &[]PieceMove{}
+			calculateBishopMoves(moves,
+				gameBoard.Board.BlackBishops,
+				&gameBoard.UsefulBitboards,
+				false)
+
+			assert.ElementsMatch(t, tt.expectedMoves, *moves)
+		})
+	}
+}
+
+func TestCalculateWhiteRookMoves(t *testing.T) {
+	tests := []struct {
+		name          string
+		board         boardrepresentation.Board
+		expectedMoves []PieceMove
+	}{
+		{
+			name: "White Rook",
+			board: boardrepresentation.Board{
+				WhiteRooks:   uint64(603979776),  // c4 & f4
+				BlackBishops: uint64(262144),     // c3
+				BlackQueens:  uint64(1073741824), // g4
+			},
+			expectedMoves: append(
+				getMoves(
+					boardrepresentation.RookPieceType,
+					uint64(67108864),
+					[]uint64{
+						33554432,
+						16777216,
+						17179869184,
+						4398046511104,
+						1125899906842624,
+						288230376151711744,
+						134217728,
+						268435456,
+					},
+					[]uint64{262144}),
+				getMoves(
+					boardrepresentation.RookPieceType,
+					uint64(536870912),
+					[]uint64{
+						134217728,
+						268435456,
+						137438953472,
+						35184372088832,
+						9007199254740992,
+						2305843009213693952,
+						2097152,
+						8192,
+						32,
+					},
+					[]uint64{1073741824})...),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gameBoard := &boardrepresentation.GameBoard{
+				Board: tt.board,
+			}
+			gameBoard.CalculateUsefulBitboards()
+
+			moves := &[]PieceMove{}
+			calculateRookMoves(moves,
+				gameBoard.Board.WhiteRooks,
+				&gameBoard.UsefulBitboards,
+				true)
+
+			assert.ElementsMatch(t, tt.expectedMoves, *moves)
+		})
+	}
+}
+
+func TestCalculateBlackRookMoves(t *testing.T) {
+	tests := []struct {
+		name          string
+		board         boardrepresentation.Board
+		expectedMoves []PieceMove
+	}{
+		{
+			name: "Black Rook",
+			board: boardrepresentation.Board{
+				BlackRooks:   uint64(603979776),  // c4 & f4
+				WhiteBishops: uint64(262144),     // c3
+				WhiteQueens:  uint64(1073741824), // g4
+			},
+			expectedMoves: append(
+				getMoves(
+					boardrepresentation.RookPieceType,
+					uint64(67108864),
+					[]uint64{
+						33554432,
+						16777216,
+						17179869184,
+						4398046511104,
+						1125899906842624,
+						288230376151711744,
+						134217728,
+						268435456,
+					},
+					[]uint64{262144}),
+				getMoves(
+					boardrepresentation.RookPieceType,
+					uint64(536870912),
+					[]uint64{
+						134217728,
+						268435456,
+						137438953472,
+						35184372088832,
+						9007199254740992,
+						2305843009213693952,
+						2097152,
+						8192,
+						32,
+					},
+					[]uint64{1073741824})...),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gameBoard := &boardrepresentation.GameBoard{
+				Board: tt.board,
+			}
+			gameBoard.CalculateUsefulBitboards()
+
+			moves := &[]PieceMove{}
+			calculateRookMoves(moves,
+				gameBoard.Board.BlackRooks,
+				&gameBoard.UsefulBitboards,
+				false)
+
+			assert.ElementsMatch(t, tt.expectedMoves, *moves)
+		})
+	}
+}
+
+// TODO: Add tests for Queens
+
 func getMoves(pieceType boardrepresentation.PieceType, from uint64, normalToMoves, attackToMoves []uint64) []PieceMove {
 	pieceMoves := []PieceMove{}
 

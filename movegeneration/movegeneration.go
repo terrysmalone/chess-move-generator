@@ -7,6 +7,11 @@ import (
 	"github.com/terrysmalone/chess-move-generator/boardsearching/piecechecking"
 )
 
+// Note: Capturing a king is classed as a move. This was a decision to save on computation.
+//
+//	It's much quicker to check if a king has been captured at a later stage.
+//
+// TODO: Actually check if removing king captures here is slower once we have a full PerfT function
 func CalculateAllMoves(gameBoard *boardrepresentation.GameBoard) {
 	gameBoard.CalculateUsefulBitboards()
 
@@ -30,14 +35,25 @@ func calculateAllPseudoLegalMoves(gameBoard *boardrepresentation.GameBoard, piec
 			gameBoard.Board.WhiteKnights,
 			gameBoard.UsefulBitboards.AllBlackOccupiedSquares,
 			gameBoard.UsefulBitboards.EmptySquares)
+
 		calculateBishopMoves(
 			&allMoves,
 			gameBoard.Board.WhiteBishops,
 			&gameBoard.UsefulBitboards,
 			true)
 
-		// calculateRookMoves
-		// calculateQueenMoves
+		calculateRookMoves(
+			&allMoves,
+			gameBoard.Board.WhiteRooks,
+			&gameBoard.UsefulBitboards,
+			true)
+
+		calculateQueenMoves(
+			&allMoves,
+			gameBoard.Board.WhiteQueens,
+			&gameBoard.UsefulBitboards,
+			true)
+
 		// calculateWhitePawnMoves
 		// calculateWhiteKingMoves
 
@@ -48,13 +64,25 @@ func calculateAllPseudoLegalMoves(gameBoard *boardrepresentation.GameBoard, piec
 			gameBoard.Board.BlackKnights,
 			gameBoard.UsefulBitboards.AllWhiteOccupiedSquares,
 			gameBoard.UsefulBitboards.EmptySquares)
+
 		calculateBishopMoves(
 			&allMoves,
-			gameBoard.Board.WhiteBishops,
+			gameBoard.Board.BlackBishops,
 			&gameBoard.UsefulBitboards,
 			false)
-		// calculateRookMoves
-		// calculateQueenMoves
+
+		calculateRookMoves(
+			&allMoves,
+			gameBoard.Board.BlackRooks,
+			&gameBoard.UsefulBitboards,
+			false)
+
+		calculateQueenMoves(
+			&allMoves,
+			gameBoard.Board.BlackQueens,
+			&gameBoard.UsefulBitboards,
+			false)
+
 		// calculateBlackPawnMoves
 		// calculateBlackKingMoves
 		// calculateBlackCastlingMoves
@@ -116,9 +144,57 @@ func calculateBishopMoves(pieceMoves *[]PieceMove, bishops uint64, usefulBitboar
 		captureMoves := allowedMoves & ^usefulBitboards.EmptySquares
 		splitAndAddMoves(pieceMoves, captureMoves, bishopPosition, boardrepresentation.BishopPieceType, boardrepresentation.CaptureMoveType)
 
-		// Positions in allowed moves and emprty squares are non-capture moves
+		// Positions in allowed moves and empty squares are non-capture moves
 		normalMoves := allowedMoves & usefulBitboards.EmptySquares
 		splitAndAddMoves(pieceMoves, normalMoves, bishopPosition, boardrepresentation.BishopPieceType, boardrepresentation.NormalMoveType)
+
+		index--
+	}
+}
+
+func calculateRookMoves(pieceMoves *[]PieceMove, rooks uint64, usefulBitboards *boardrepresentation.UsefulBitboards, whiteToMove bool) {
+	rooksIndexes := bitboardoperations.GetSquareIndexesFromBitboard(rooks)
+
+	index := len(rooksIndexes) - 1
+
+	for index >= 0 {
+		currentPosition := rooksIndexes[index]
+		rookPosition := lookuptables.BitboardValueFromIndex[currentPosition]
+
+		allowedMoves := piecechecking.CalculateAllowedRookMoves(usefulBitboards, currentPosition, whiteToMove)
+
+		// Positions in allowed moves and non-emprty squares are captures
+		// (we've already excluded own pieces in CalculateAllowedRookMoves)
+		captureMoves := allowedMoves & ^usefulBitboards.EmptySquares
+		splitAndAddMoves(pieceMoves, captureMoves, rookPosition, boardrepresentation.RookPieceType, boardrepresentation.CaptureMoveType)
+
+		// Positions in allowed moves and empty squares are non-capture moves
+		normalMoves := allowedMoves & usefulBitboards.EmptySquares
+		splitAndAddMoves(pieceMoves, normalMoves, rookPosition, boardrepresentation.RookPieceType, boardrepresentation.NormalMoveType)
+
+		index--
+	}
+}
+
+func calculateQueenMoves(pieceMoves *[]PieceMove, queens uint64, usefulBitboards *boardrepresentation.UsefulBitboards, whiteToMove bool) {
+	queenssIndexes := bitboardoperations.GetSquareIndexesFromBitboard(queens)
+
+	index := len(queenssIndexes) - 1
+
+	for index >= 0 {
+		currentPosition := queenssIndexes[index]
+		queenPosition := lookuptables.BitboardValueFromIndex[currentPosition]
+
+		allowedMoves := piecechecking.CalculateAllowedQueenMoves(usefulBitboards, currentPosition, whiteToMove)
+
+		// Positions in allowed moves and non-emprty squares are captures
+		// (we've already excluded own pieces in CalculateAllowedQueenMoves)
+		captureMoves := allowedMoves & ^usefulBitboards.EmptySquares
+		splitAndAddMoves(pieceMoves, captureMoves, queenPosition, boardrepresentation.QueenPieceType, boardrepresentation.CaptureMoveType)
+
+		// Positions in allowed moves and empty squares are non-capture moves
+		normalMoves := allowedMoves & usefulBitboards.EmptySquares
+		splitAndAddMoves(pieceMoves, normalMoves, queenPosition, boardrepresentation.QueenPieceType, boardrepresentation.NormalMoveType)
 
 		index--
 	}
