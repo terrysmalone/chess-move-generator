@@ -198,7 +198,7 @@ func calculateAllowedRightMovesFromBoard(usefulBitboards *boardrepresentation.Us
 }
 
 func calculateAllowedDownMoves(usefulBitboards *boardrepresentation.UsefulBitboards, pieceIndex byte, whiteToMove bool) uint64 {
-	downBoard := lookuptables.RightBoard[pieceIndex]
+	downBoard := lookuptables.DownBoard[pieceIndex]
 	return calculateAllowedDownMovesFromBoard(usefulBitboards, downBoard, whiteToMove)
 }
 
@@ -210,7 +210,7 @@ func calculateAllowedDownMovesFromBoard(usefulBitboards *boardrepresentation.Use
 	downMoves = (downMoves >> 8) | (downMoves >> 16) | (downMoves >> 24) | (downMoves >> 32) | (downMoves >> 40) | (downMoves >> 48)
 
 	// Get just the allowed squares using XOR
-	downMoves ^= downMoves
+	downMoves ^= downBoard
 
 	// Remove the blocking piece if it can't be captured (i.e. It is a friendly piece)
 	if whiteToMove {
@@ -223,7 +223,7 @@ func calculateAllowedDownMovesFromBoard(usefulBitboards *boardrepresentation.Use
 }
 
 func calculateAllowedLeftMoves(usefulBitboards *boardrepresentation.UsefulBitboards, pieceIndex byte, whiteToMove bool) uint64 {
-	leftBoard := lookuptables.RightBoard[pieceIndex]
+	leftBoard := lookuptables.LeftBoard[pieceIndex]
 	return calculateAllowedLeftMovesFromBoard(usefulBitboards, leftBoard, whiteToMove)
 }
 
